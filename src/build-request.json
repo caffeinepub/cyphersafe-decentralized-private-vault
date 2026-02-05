@@ -1,0 +1,147 @@
+{
+  "kind": "build_request",
+  "title": "Add secure secret-link sharing for notes (view-once or timed expiry) with encrypted receiver view",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Add a golden “Share” icon button (paper plane or link symbol) to the top-right of the note view/edit screen (the full-screen note overlay when viewing an existing note). Clicking it must open sharing options for the currently open note.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-9"
+        ],
+        "quotes": [
+          "The 'Share' Button: Place a golden 'Share' icon (a paper plane or link symbol) on the top-right of the note view page."
+        ]
+      },
+      "acceptanceCriteria": [
+        "When editing/viewing an existing note, a Share icon button is visible in the top-right area of the note overlay header.",
+        "The Share icon uses a gold color treatment consistent with the app’s existing gold accents.",
+        "Clicking the Share icon opens a small pop-up/dialog with share security options (see REQ-2).",
+        "The Share control is not shown (or is disabled with an explanation) when there is no existing note open (e.g., create mode)."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Implement the share options pop-up with exactly these choices: (1) “View Once” (link becomes unusable after the first successful open and the shared payload is deleted from the canister’s share storage), (2) “Timed Expiry” with selectable durations “1 hour” and “24 hours”. After the user selects an option, generate a secret link and copy it to clipboard.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-9"
+        ],
+        "quotes": [
+          "Security Options: Show a small pop-up with two choices:\n​'View Once': Link expires and deletes the note from the share-server immediately after the first open.\n​'Timed Expiry': Link expires after 1 hour/24 hours."
+        ]
+      },
+      "acceptanceCriteria": [
+        "The pop-up presents a “View Once” option and a “Timed Expiry” option.",
+        "When “Timed Expiry” is chosen, the user can choose exactly “1 hour” or “24 hours”.",
+        "Selecting an option triggers secret-link generation for the currently open note and copies the resulting link to the clipboard.",
+        "If clipboard copy fails, show an English error toast/message and still display the generated link so the user can manually copy it."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Generate a unique encrypted URL for a specific note using client-side encryption: encrypt the note payload in the browser, store only ciphertext (plus any required non-secret parameters like IV) in the backend share store, and put the decryption key only in the URL hash fragment so it is not sent to the canister in requests.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-9"
+        ],
+        "quotes": [
+          "Link Logic: When clicked, generate a unique, encrypted URL for that specific note."
+        ]
+      },
+      "acceptanceCriteria": [
+        "The plaintext note content is encrypted in the frontend before being sent to the backend for sharing.",
+        "The backend stores only encrypted payload data and metadata needed to validate expiry/view-once behavior; it does not require the plaintext note content to serve receivers.",
+        "The generated secret link includes: a share identifier (non-secret) and a decryption key contained in the URL hash fragment (secret).",
+        "The app uses the existing URL secret-handling approach (hash/session behavior) so the secret key is removed from the address bar after extraction on the receiver page."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Backend: add share-link storage and APIs to create and open shared-note links. Creating a link must store encrypted payload + metadata (createdAt, expiresAt, viewOnce). Opening a link must enforce expiry. For “View Once”, the first successful open must delete the shared payload so subsequent opens fail.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-9"
+        ],
+        "quotes": [
+          "'View Once': Link expires and deletes the note from the share-server immediately after the first open.\n​'Timed Expiry': Link expires after 1 hour/24 hours."
+        ]
+      },
+      "acceptanceCriteria": [
+        "A new backend method exists to create a share record that returns a unique shareId.",
+        "A new backend method exists to open/consume a share record by shareId and return the encrypted payload (and required non-secret fields like IV).",
+        "For timed expiry links, opens after expiresAt fail with a clear error (trap or error result) and do not return the payload.",
+        "For view-once links, the first successful open returns the payload and removes it from share storage; subsequent opens fail.",
+        "Opening a link does not require Internet Identity authentication (receiver can be unauthenticated), but only returns encrypted data (never plaintext)."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Frontend: add a receiver route/page that renders a professional “CypherSafe Secure View” experience in a Gold & Black theme. When a receiver opens a secret link, the page must: fetch the encrypted payload using the shareId, decrypt it using the key from the URL hash fragment, display the note content in a read-only secure view, and show the warning text: “This note is encrypted and will self-destruct after viewing.”",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-9"
+        ],
+        "quotes": [
+          "When the receiver opens the link, show a professional 'CypherSafe Secure View' page (Gold & Black theme).\n​Add a warning: 'This note is encrypted and will self-destruct after viewing.'"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A new route exists for opening secret links (e.g., a dedicated secure view page) and can be accessed without being logged in.",
+        "The page prominently displays the title “CypherSafe Secure View”.",
+        "The page includes the exact warning text: “This note is encrypted and will self-destruct after viewing.”",
+        "The UI styling for this page is clearly Gold & Black themed (backgrounds, borders, typography) and looks distinct/professional compared to the editor.",
+        "The decrypted note is displayed read-only; editing controls are not shown.",
+        "If the link is expired/consumed/invalid, the page shows an English error state instead of blank content."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Visual feedback: after successfully copying a generated secret link, show a success animation and the exact message “Secret Link Copied to Clipboard!”.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-9"
+        ],
+        "quotes": [
+          "Visual Feedback: Once the link is copied, show a success animation: 'Secret Link Copied to Clipboard!\""
+        ]
+      },
+      "acceptanceCriteria": [
+        "After link generation and successful clipboard write, the user sees an animated success indication (e.g., animated toast/checkmark, brief glow/pulse) and the exact English message: “Secret Link Copied to Clipboard!”.",
+        "The success feedback is triggered only after the copy operation succeeds (not merely after link generation)."
+      ]
+    }
+  ],
+  "constraints": [
+    "Use English for any user-facing text.",
+    "Backend must remain a single Motoko actor (all logic in backend/main.mo).",
+    "Do not edit any files under frontend/src/components/ui or any paths listed as immutable in SYSTEM_CONTEXT.",
+    "Do not require third-party auth or external databases/services; implement sharing within the existing canister + frontend."
+  ],
+  "nonGoals": [
+    "Do not delete the user’s original note when a share link is opened; only delete the shared-link payload/record for view-once behavior.",
+    "Do not add real-time features (no WebSockets/live link status).",
+    "Do not implement third-party sharing integrations (email/SMS/social)."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
+  }
+}

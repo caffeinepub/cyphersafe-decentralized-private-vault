@@ -1,0 +1,137 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Secure secret-link sharing for encrypted notes with receiver secure view",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Add a gold Share icon button to the note full-screen editor header that opens sharing options for the currently open existing note.",
+      "acceptanceCriteria": [
+        "When editing/viewing an existing note, a Share icon button is visible in the top-right area of the note overlay header.",
+        "The Share icon uses a gold color treatment consistent with the app’s existing gold accents.",
+        "Clicking the Share icon opens a small pop-up/dialog with share security options (see REQ-2).",
+        "The Share control is not shown (or is disabled with an explanation) when there is no existing note open (e.g., create mode)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/FullScreenEditorOverlay.tsx",
+          "operation": "modify",
+          "description": "Add a gold Share icon button in the overlay header (top-right area) that is only available in edit mode with an existing note. Wire it to open the share options dialog for the currently open note."
+        },
+        {
+          "path": "frontend/src/components/ShareLinkDialog.tsx",
+          "operation": "create",
+          "description": "Create a share options dialog/popup UI used by the FullScreenEditorOverlay Share button. Include a clear explanation state when invoked without a shareable note (should not happen if REQ-1 gating is correct)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Implement the share options pop-up with View Once and Timed Expiry (1 hour/24 hours) and generate + copy a secret link after selection, with manual copy fallback on failure.",
+      "acceptanceCriteria": [
+        "The pop-up presents a “View Once” option and a “Timed Expiry” option.",
+        "When “Timed Expiry” is chosen, the user can choose exactly “1 hour” or “24 hours”.",
+        "Selecting an option triggers secret-link generation for the currently open note and copies the resulting link to the clipboard.",
+        "If clipboard copy fails, show an English error toast/message and still display the generated link so the user can manually copy it."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ShareLinkDialog.tsx",
+          "operation": "modify",
+          "description": "Implement the exact option set: “View Once” and “Timed Expiry” with exactly “1 hour” and “24 hours”. After selection, call frontend share-link generation (REQ-3), attempt clipboard write, and on failure show an English error toast/message while still rendering the generated link in the dialog for manual copy."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add React Query mutation hook(s) for calling the existing backend capability to create a share record (createShareLink) needed by the share dialog flow, including user-facing English error handling via toasts."
+        },
+        {
+          "path": "frontend/src/utils/shareLink.ts",
+          "operation": "create",
+          "description": "Add helper(s) to build the final secret URL format from a returned shareId and a generated secret key (stored in the URL hash fragment), keeping link formatting consistent across the app."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Generate a unique encrypted URL using client-side encryption; store only ciphertext + non-secret parameters in the backend, and keep the decryption key only in the URL hash fragment with existing secret-handling behavior (extract then remove from address bar).",
+      "acceptanceCriteria": [
+        "The plaintext note content is encrypted in the frontend before being sent to the backend for sharing.",
+        "The backend stores only encrypted payload data and metadata needed to validate expiry/view-once behavior; it does not require the plaintext note content to serve receivers.",
+        "The generated secret link includes: a share identifier (non-secret) and a decryption key contained in the URL hash fragment (secret).",
+        "The app uses the existing URL secret-handling approach (hash/session behavior) so the secret key is removed from the address bar after extraction on the receiver page."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/utils/shareCrypto.ts",
+          "operation": "create",
+          "description": "Implement client-side encryption/decryption helpers using the browser Web Crypto API (e.g., AES-GCM) to produce ciphertext plus a non-secret nonce/IV, and to decrypt using a key provided by the receiver via URL hash."
+        },
+        {
+          "path": "frontend/src/components/ShareLinkDialog.tsx",
+          "operation": "modify",
+          "description": "Wire encryption into share creation: encrypt the selected note payload in the browser, send only ciphertext + nonce/IV and selected expiry/view-once metadata via the createShareLink mutation, then build a secret link that places the decryption key only in the URL hash fragment."
+        },
+        {
+          "path": "frontend/src/utils/urlParams.ts",
+          "operation": "modify",
+          "description": "Extend the existing secret hash extraction/clearing behavior so it also correctly clears secrets for links using a plain hash fragment format like \"#k=...\" (not only hash routes with \"?\"), ensuring the decryption key is removed from the address bar after extraction on the receiver page."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Add an unauthenticated receiver route/page for secret links that fetches encrypted payload by shareId, decrypts using key from URL hash, and renders a professional Gold & Black “CypherSafe Secure View” read-only experience with the required warning and error states.",
+      "acceptanceCriteria": [
+        "A new route exists for opening secret links (e.g., a dedicated secure view page) and can be accessed without being logged in.",
+        "The page prominently displays the title “CypherSafe Secure View”.",
+        "The page includes the exact warning text: “This note is encrypted and will self-destruct after viewing.”",
+        "The UI styling for this page is clearly Gold & Black themed (backgrounds, borders, typography) and looks distinct/professional compared to the editor.",
+        "The decrypted note is displayed read-only; editing controls are not shown.",
+        "If the link is expired/consumed/invalid, the page shows an English error state instead of blank content."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/SecureNoteViewPage.tsx",
+          "operation": "create",
+          "description": "Create the receiver page that reads shareId from the route, extracts the decryption key from the URL hash via the existing secret-handling utility, fetches the encrypted payload using the backend capability openShareLink, decrypts it client-side, and renders a read-only Gold & Black themed “CypherSafe Secure View” with the exact required warning text and an English error state for expired/invalid/consumed links."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add React Query hook(s) for opening/consuming a share record (openShareLink) to retrieve encrypted payload + nonce/IV for the receiver page, with clean English error mapping for UI rendering."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add and wire a new router route for the secure receiver experience (e.g., /s/$shareId) that is accessible without login. Update the existing auth/lock gating so this secure view route can render for unauthenticated users (using the anonymous actor). Also ensure layout (Header/Footer) is hidden or replaced for the secure view to keep the experience distinct/professional."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add Gold & Black themed styles/utilities specific to the secure receiver view (background, borders, typography) and any small animations needed on that page, without altering any immutable UI library files."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Show an animated success indication after clipboard copy succeeds with the exact message “Secret Link Copied to Clipboard!”.",
+      "acceptanceCriteria": [
+        "After link generation and successful clipboard write, the user sees an animated success indication (e.g., animated toast/checkmark, brief glow/pulse) and the exact English message: “Secret Link Copied to Clipboard!”.",
+        "The success feedback is triggered only after the copy operation succeeds (not merely after link generation)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ShareLinkDialog.tsx",
+          "operation": "modify",
+          "description": "After a successful clipboard write, trigger an animated success indication and display the exact message “Secret Link Copied to Clipboard!” (and ensure it is only shown on copy success, not on mere link generation)."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add a small reusable animation (e.g., gold pulse/glow/checkmark animation class) to support the post-copy success feedback visual required by REQ-6."
+        }
+      ]
+    }
+  ]
+}

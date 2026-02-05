@@ -1,0 +1,121 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-05T17:58:50.024Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 6,
+    "implemented": 5,
+    "items": [
+      {
+        "id": "REQ-1",
+        "summary": "Add a golden “Share” icon button (paper plane or link symbol) to the top-right of the note view/edit screen (the full-screen note overlay when viewing an existing note). Clicking it must open sharing options for the currently open note.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/FullScreenEditorOverlay.tsx",
+          "frontend/src/components/ShareLinkDialog.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/FullScreenEditorOverlay.tsx",
+          "frontend/src/components/ShareLinkDialog.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Implement the share options pop-up with exactly these choices: (1) “View Once” (link becomes unusable after the first successful open and the shared payload is deleted from the canister’s share storage), (2) “Timed Expiry” with selectable durations “1 hour” and “24 hours”. After the user selects an option, generate a secret link and copy it to clipboard.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/ShareLinkDialog.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/utils/shareLink.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/ShareLinkDialog.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/utils/shareLink.ts"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Generate a unique encrypted URL for a specific note using client-side encryption: encrypt the note payload in the browser, store only ciphertext (plus any required non-secret parameters like IV) in the backend share store, and put the decryption key only in the URL hash fragment so it is not sent to the canister in requests.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/utils/shareCrypto.ts",
+          "frontend/src/components/ShareLinkDialog.tsx",
+          "frontend/src/utils/urlParams.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/utils/shareCrypto.ts",
+          "frontend/src/components/ShareLinkDialog.tsx",
+          "frontend/src/utils/urlParams.ts"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Backend: add share-link storage and APIs to create and open shared-note links. Creating a link must store encrypted payload + metadata (createdAt, expiresAt, viewOnce). Opening a link must enforce expiry. For “View Once”, the first successful open must delete the shared payload so subsequent opens fail.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Frontend: add a receiver route/page that renders a professional “CypherSafe Secure View” experience in a Gold & Black theme. When a receiver opens a secret link, the page must: fetch the encrypted payload using the shareId, decrypt it using the key from the URL hash fragment, display the note content in a read-only secure view, and show the warning text: “This note is encrypted and will self-destruct after viewing.”",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/SecureNoteViewPage.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/App.tsx",
+          "frontend/src/index.css"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/SecureNoteViewPage.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/App.tsx",
+          "frontend/src/index.css"
+        ]
+      },
+      {
+        "id": "REQ-6",
+        "summary": "Visual feedback: after successfully copying a generated secret link, show a success animation and the exact message “Secret Link Copied to Clipboard!”.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/ShareLinkDialog.tsx",
+          "frontend/src/index.css"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/ShareLinkDialog.tsx",
+          "frontend/src/index.css"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
+    "build-request.json",
+    "caffeine.lock.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/src/App.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/FullScreenEditorOverlay.tsx",
+    "frontend/src/components/SecureNoteViewPage.tsx",
+    "frontend/src/components/ShareLinkDialog.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/index.css",
+    "frontend/src/utils/shareCrypto.ts",
+    "frontend/src/utils/shareLink.ts",
+    "frontend/src/utils/urlParams.ts",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}
