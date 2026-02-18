@@ -2,11 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-golden-share-icon-button-paper-plane-or-link-symbol-to-the-top-right-of-the-note-view-edit-screen-the-full-screen-note-overlay-when-viewing-an-existing-note-clicking-it-must-open-sharing-options-for-the-currently-open-note",
-      "featureTitle": "Add a golden “Share” icon button (paper plane or link symbol) to the top-right of the note view/edit screen (the full-screen note overlay when viewing an existing note). Clicking it must open sharing options for the currently open note.",
+      "featureId": "feature-implement-responsive-side-by-side-layout-for-screens-wider-than-1024px-left-panel-displays-the-notes-list-right-panel-displays-the-full-screen-editor-focus-mode",
+      "featureTitle": "Implement responsive side-by-side layout for screens wider than 1024px: left panel displays the notes list, right panel displays the full-screen editor (focus mode)",
       "files": [
         "frontend/src/components/FullScreenEditorOverlay.tsx",
-        "frontend/src/components/ShareLinkDialog.tsx"
+        "frontend/src/components/NotesApp.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -23,12 +23,11 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-the-share-options-pop-up-with-exactly-these-choices-1-view-once-link-becomes-unusable-after-the-first-successful-open-and-the-shared-payload-is-deleted-from-the-canister-s-share-storage-2-timed-expiry-with-selectable-durations-1-hour-and-24-hours-after-the-user-selects-an-option-generate-a-secret-link-and-copy-it-to-clipboard",
-      "featureTitle": "Implement the share options pop-up with exactly these choices: (1) “View Once” (link becomes unusable after the first successful open and the shared payload is deleted from the canister’s share storage), (2) “Timed Expiry” with selectable durations “1 hour” and “24 hours”. After the user selects an option, generate a secret link and copy it to clipboard.",
+      "featureId": "feature-add-keyboard-shortcut-ctrl-n-to-create-a-new-note",
+      "featureTitle": "Add keyboard shortcut Ctrl+N to create a new note",
       "files": [
-        "frontend/src/components/ShareLinkDialog.tsx",
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/utils/shareLink.ts"
+        "frontend/src/components/NotesApp.tsx",
+        "frontend/src/hooks/useKeyboardShortcuts.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -45,12 +44,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-generate-a-unique-encrypted-url-for-a-specific-note-using-client-side-encryption-encrypt-the-note-payload-in-the-browser-store-only-ciphertext-plus-any-required-non-secret-parameters-like-iv-in-the-backend-share-store-and-put-the-decryption-key-only-in-the-url-hash-fragment-so-it-is-not-sent-to-the-canister-in-requests",
-      "featureTitle": "Generate a unique encrypted URL for a specific note using client-side encryption: encrypt the note payload in the browser, store only ciphertext (plus any required non-secret parameters like IV) in the backend share store, and put the decryption key only in the URL hash fragment so it is not sent to the canister in requests.",
+      "featureId": "feature-add-keyboard-shortcut-ctrl-s-to-save-the-current-note",
+      "featureTitle": "Add keyboard shortcut Ctrl+S to save the current note",
       "files": [
-        "frontend/src/components/ShareLinkDialog.tsx",
-        "frontend/src/utils/shareCrypto.ts",
-        "frontend/src/utils/urlParams.ts"
+        "frontend/src/components/FullScreenEditorOverlay.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -67,13 +64,31 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-frontend-add-a-receiver-route-page-that-renders-a-professional-cyphersafe-secure-view-experience-in-a-gold-black-theme-when-a-receiver-opens-a-secret-link-the-page-must-fetch-the-encrypted-payload-using-the-shareid-decrypt-it-using-the-key-from-the-url-hash-fragment-display-the-note-content-in-a-read-only-secure-view-and-show-the-warning-text-this-note-is-encrypted-and-will-self-destruct-after-viewing",
-      "featureTitle": "Frontend: add a receiver route/page that renders a professional “CypherSafe Secure View” experience in a Gold & Black theme. When a receiver opens a secret link, the page must: fetch the encrypted payload using the shareId, decrypt it using the key from the URL hash fragment, display the note content in a read-only secure view, and show the warning text: “This note is encrypted and will self-destruct after viewing.”",
+      "featureId": "feature-add-keyboard-shortcut-esc-to-exit-focus-mode-editor",
+      "featureTitle": "Add keyboard shortcut Esc to exit focus mode editor",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/SecureNoteViewPage.tsx",
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/index.css"
+        "frontend/src/components/FullScreenEditorOverlay.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-display-a-golden-notification-prompting-desktop-users-to-install-cyphersafe-with-the-message-install-cyphersafe-on-your-desktop-for-a-larger-writing-canvas",
+      "featureTitle": "Display a golden notification prompting desktop users to install CypherSafe with the message: 'Install CypherSafe on your Desktop for a larger writing canvas.'",
+      "files": [
+        "frontend/src/components/InstallPrompt.tsx",
+        "frontend/src/components/NotesApp.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -90,11 +105,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-visual-feedback-after-successfully-copying-a-generated-secret-link-show-a-success-animation-and-the-exact-message-secret-link-copied-to-clipboard",
-      "featureTitle": "Visual feedback: after successfully copying a generated secret link, show a success animation and the exact message “Secret Link Copied to Clipboard!”.",
+      "featureId": "feature-verify-that-notes-saved-on-mobile-via-icp-blockchain-are-instantly-visible-on-the-pc-version-using-the-same-internet-identity-login",
+      "featureTitle": "Verify that notes saved on mobile via ICP blockchain are instantly visible on the PC version using the same Internet Identity login",
       "files": [
-        "frontend/src/components/ShareLinkDialog.tsx",
-        "frontend/src/index.css"
+        "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
         "authorization@4.0.0",

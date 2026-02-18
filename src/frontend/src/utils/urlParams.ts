@@ -123,41 +123,32 @@ function clearParamFromHash(paramName: string): void {
     // Remove the leading #
     const hashContent = hash.substring(1);
 
-    // Check if it's a plain hash fragment (like #k=value) or a route with query (like #/route?k=value)
+    // Split route path from query string
     const queryStartIndex = hashContent.indexOf('?');
-    const equalsIndex = hashContent.indexOf('=');
 
-    // Plain hash fragment format: #k=value
-    if (queryStartIndex === -1 && equalsIndex !== -1) {
-        const params = new URLSearchParams(hashContent);
-        params.delete(paramName);
-        const newHash = params.toString();
-        const newUrl = window.location.pathname + window.location.search + (newHash ? '#' + newHash : '');
-        window.history.replaceState(null, '', newUrl);
+    if (queryStartIndex === -1) {
+        // No query string in hash, nothing to remove
         return;
     }
 
-    // Route with query format: #/route?k=value
-    if (queryStartIndex !== -1) {
-        const routePath = hashContent.substring(0, queryStartIndex);
-        const queryString = hashContent.substring(queryStartIndex + 1);
+    const routePath = hashContent.substring(0, queryStartIndex);
+    const queryString = hashContent.substring(queryStartIndex + 1);
 
-        // Parse and remove the specific parameter
-        const params = new URLSearchParams(queryString);
-        params.delete(paramName);
+    // Parse and remove the specific parameter
+    const params = new URLSearchParams(queryString);
+    params.delete(paramName);
 
-        // Reconstruct the URL
-        const newQueryString = params.toString();
-        let newHash = routePath;
+    // Reconstruct the URL
+    const newQueryString = params.toString();
+    let newHash = routePath;
 
-        if (newQueryString) {
-            newHash += '?' + newQueryString;
-        }
-
-        // If we still have content in the hash, keep it; otherwise remove the hash entirely
-        const newUrl = window.location.pathname + window.location.search + (newHash ? '#' + newHash : '');
-        window.history.replaceState(null, '', newUrl);
+    if (newQueryString) {
+        newHash += '?' + newQueryString;
     }
+
+    // If we still have content in the hash, keep it; otherwise remove the hash entirely
+    const newUrl = window.location.pathname + window.location.search + (newHash ? '#' + newHash : '');
+    window.history.replaceState(null, '', newUrl);
 }
 
 /**
@@ -165,7 +156,7 @@ function clearParamFromHash(paramName: string): void {
  * Hash fragments aren't sent to servers or logged in access logs
  * The hash is immediately cleared from the URL after extraction to prevent history leakage
  *
- * Usage: https://yourapp.com/#secret=xxx or https://yourapp.com/#k=xxx
+ * Usage: https://yourapp.com/#secret=xxx
  *
  * @param paramName - The name of the secret parameter
  * @returns The secret value if found (from hash or session), null otherwise

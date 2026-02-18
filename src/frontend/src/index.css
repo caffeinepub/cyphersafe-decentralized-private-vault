@@ -495,6 +495,66 @@
   animation: pulse-gold 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* Install Prompt Banner */
+.install-prompt-banner {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.08) 100%);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: slide-down 0.3s ease-out;
+}
+
+@keyframes slide-down {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.install-prompt-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.install-prompt-text {
+  color: #D4AF37;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: 'Exo 2', sans-serif;
+}
+
+.install-prompt-button {
+  border-color: rgba(212, 175, 55, 0.5);
+  color: #D4AF37;
+  transition: all 0.3s ease;
+}
+
+.install-prompt-button:hover {
+  background: rgba(212, 175, 55, 0.1);
+  border-color: rgba(212, 175, 55, 0.8);
+}
+
+.install-prompt-close {
+  color: #D4AF37;
+  transition: all 0.3s ease;
+}
+
+.install-prompt-close:hover {
+  background: rgba(212, 175, 55, 0.1);
+}
+
 /* Share Dialog Styles */
 .share-dialog-content {
   background: #0a0a0a;

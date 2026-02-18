@@ -1,135 +1,119 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Secure secret-link sharing for encrypted notes with receiver secure view",
+  "title": "Optimize CypherSafe for Desktop with Responsive Layout and Keyboard Shortcuts",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Add a gold Share icon button to the note full-screen editor header that opens sharing options for the currently open existing note.",
+      "summary": "Implement responsive side-by-side layout for screens wider than 1024px with notes list on left and full-screen editor on right",
       "acceptanceCriteria": [
-        "When editing/viewing an existing note, a Share icon button is visible in the top-right area of the note overlay header.",
-        "The Share icon uses a gold color treatment consistent with the app’s existing gold accents.",
-        "Clicking the Share icon opens a small pop-up/dialog with share security options (see REQ-2).",
-        "The Share control is not shown (or is disabled with an explanation) when there is no existing note open (e.g., create mode)."
+        "On screens wider than 1024px, NotesApp.tsx displays a two-column layout",
+        "Left column shows the NotesList component",
+        "Right column shows the FullScreenEditorOverlay component embedded inline (not as an overlay)",
+        "Layout remains stacked/single-column on screens 1024px or narrower"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/FullScreenEditorOverlay.tsx",
+          "path": "frontend/src/components/NotesApp.tsx",
           "operation": "modify",
-          "description": "Add a gold Share icon button in the overlay header (top-right area) that is only available in edit mode with an existing note. Wire it to open the share options dialog for the currently open note."
+          "description": "Add responsive layout logic: wrap the component in a container that displays as a two-column grid on screens >1024px using Tailwind breakpoints (lg:grid lg:grid-cols-2). On desktop, embed FullScreenEditorOverlay inline in the right column instead of rendering it as a fixed overlay. On mobile (≤1024px), maintain the existing stacked layout with the overlay behavior. Ensure selectedNote state properly controls which note is displayed in the right panel."
         },
         {
-          "path": "frontend/src/components/ShareLinkDialog.tsx",
-          "operation": "create",
-          "description": "Create a share options dialog/popup UI used by the FullScreenEditorOverlay Share button. Include a clear explanation state when invoked without a shareable note (should not happen if REQ-1 gating is correct)."
+          "path": "frontend/src/components/FullScreenEditorOverlay.tsx",
+          "operation": "modify",
+          "description": "Add a prop to control whether the editor renders as an overlay (mobile) or inline panel (desktop). When inline mode is active (>1024px), remove fixed positioning and overlay backdrop, and render as a standard scrollable panel. Preserve all existing editor functionality including speech-to-text, animations, and self-destruct settings regardless of display mode."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Implement the share options pop-up with View Once and Timed Expiry (1 hour/24 hours) and generate + copy a secret link after selection, with manual copy fallback on failure.",
+      "summary": "Add keyboard shortcut Ctrl+N to create a new note",
       "acceptanceCriteria": [
-        "The pop-up presents a “View Once” option and a “Timed Expiry” option.",
-        "When “Timed Expiry” is chosen, the user can choose exactly “1 hour” or “24 hours”.",
-        "Selecting an option triggers secret-link generation for the currently open note and copies the resulting link to the clipboard.",
-        "If clipboard copy fails, show an English error toast/message and still display the generated link so the user can manually copy it."
+        "Pressing Ctrl+N anywhere in the app triggers note creation",
+        "Shortcut opens the full-screen editor for a new note",
+        "Shortcut only activates when user is authenticated"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/ShareLinkDialog.tsx",
-          "operation": "modify",
-          "description": "Implement the exact option set: “View Once” and “Timed Expiry” with exactly “1 hour” and “24 hours”. After selection, call frontend share-link generation (REQ-3), attempt clipboard write, and on failure show an English error toast/message while still rendering the generated link in the dialog for manual copy."
-        },
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Add React Query mutation hook(s) for calling the existing backend capability to create a share record (createShareLink) needed by the share dialog flow, including user-facing English error handling via toasts."
-        },
-        {
-          "path": "frontend/src/utils/shareLink.ts",
+          "path": "frontend/src/hooks/useKeyboardShortcuts.ts",
           "operation": "create",
-          "description": "Add helper(s) to build the final secret URL format from a returned shareId and a generated secret key (stored in the URL hash fragment), keeping link formatting consistent across the app."
+          "description": "Create a custom hook that listens for keyboard shortcuts using useEffect with document event listeners. Support Ctrl+N (create new note), Ctrl+S (save note), and Esc (exit editor). Accept callback props for each shortcut action. Prevent default browser behavior for Ctrl+S. Only activate shortcuts when user is authenticated (check via useInternetIdentity)."
+        },
+        {
+          "path": "frontend/src/components/NotesApp.tsx",
+          "operation": "modify",
+          "description": "Import and use the useKeyboardShortcuts hook. Wire Ctrl+N to trigger the same logic as the create note button (set selectedNote to null and open editor). Ensure the shortcut only works when the user is authenticated."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Generate a unique encrypted URL using client-side encryption; store only ciphertext + non-secret parameters in the backend, and keep the decryption key only in the URL hash fragment with existing secret-handling behavior (extract then remove from address bar).",
+      "summary": "Add keyboard shortcut Ctrl+S to save the current note",
       "acceptanceCriteria": [
-        "The plaintext note content is encrypted in the frontend before being sent to the backend for sharing.",
-        "The backend stores only encrypted payload data and metadata needed to validate expiry/view-once behavior; it does not require the plaintext note content to serve receivers.",
-        "The generated secret link includes: a share identifier (non-secret) and a decryption key contained in the URL hash fragment (secret).",
-        "The app uses the existing URL secret-handling approach (hash/session behavior) so the secret key is removed from the address bar after extraction on the receiver page."
+        "Pressing Ctrl+S while editing a note triggers the save mutation",
+        "Default browser save behavior is prevented",
+        "Visual feedback confirms save action"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/utils/shareCrypto.ts",
-          "operation": "create",
-          "description": "Implement client-side encryption/decryption helpers using the browser Web Crypto API (e.g., AES-GCM) to produce ciphertext plus a non-secret nonce/IV, and to decrypt using a key provided by the receiver via URL hash."
-        },
-        {
-          "path": "frontend/src/components/ShareLinkDialog.tsx",
+          "path": "frontend/src/components/FullScreenEditorOverlay.tsx",
           "operation": "modify",
-          "description": "Wire encryption into share creation: encrypt the selected note payload in the browser, send only ciphertext + nonce/IV and selected expiry/view-once metadata via the createShareLink mutation, then build a secret link that places the decryption key only in the URL hash fragment."
-        },
+          "description": "Import and use the useKeyboardShortcuts hook (created in REQ-2). Wire Ctrl+S to trigger the handleSave function that already exists in this component. Ensure preventDefault is called to block browser save dialog. Add visual feedback (e.g., brief success message or animation) when save completes."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Add keyboard shortcut Esc to exit focus mode editor",
+      "acceptanceCriteria": [
+        "Pressing Esc closes the full-screen editor overlay",
+        "On desktop (>1024px), Esc clears the selected note and returns to notes list only",
+        "Shortcut only works when editor is active"
+      ],
+      "file_operations": [
         {
-          "path": "frontend/src/utils/urlParams.ts",
+          "path": "frontend/src/components/FullScreenEditorOverlay.tsx",
           "operation": "modify",
-          "description": "Extend the existing secret hash extraction/clearing behavior so it also correctly clears secrets for links using a plain hash fragment format like \"#k=...\" (not only hash routes with \"?\"), ensuring the decryption key is removed from the address bar after extraction on the receiver page."
+          "description": "Use the useKeyboardShortcuts hook (created in REQ-2) to listen for Esc key. Wire Esc to trigger the onClose callback that already exists in this component. Ensure the shortcut only fires when the editor is active/visible. On desktop layout (>1024px), Esc should clear selectedNote and return focus to the notes list."
         }
       ]
     },
     {
       "id": "REQ-5",
-      "summary": "Add an unauthenticated receiver route/page for secret links that fetches encrypted payload by shareId, decrypts using key from URL hash, and renders a professional Gold & Black “CypherSafe Secure View” read-only experience with the required warning and error states.",
+      "summary": "Display a golden notification prompting desktop users to install CypherSafe as a PWA",
       "acceptanceCriteria": [
-        "A new route exists for opening secret links (e.g., a dedicated secure view page) and can be accessed without being logged in.",
-        "The page prominently displays the title “CypherSafe Secure View”.",
-        "The page includes the exact warning text: “This note is encrypted and will self-destruct after viewing.”",
-        "The UI styling for this page is clearly Gold & Black themed (backgrounds, borders, typography) and looks distinct/professional compared to the editor.",
-        "The decrypted note is displayed read-only; editing controls are not shown.",
-        "If the link is expired/consumed/invalid, the page shows an English error state instead of blank content."
+        "Notification appears only on desktop browsers (screen width >1024px)",
+        "Notification has a golden/amber visual theme",
+        "Notification is dismissible and does not reappear after dismissal",
+        "Notification prompts PWA install if supported by browser"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/SecureNoteViewPage.tsx",
+          "path": "frontend/src/components/InstallPrompt.tsx",
           "operation": "create",
-          "description": "Create the receiver page that reads shareId from the route, extracts the decryption key from the URL hash via the existing secret-handling utility, fetches the encrypted payload using the backend capability openShareLink, decrypts it client-side, and renders a read-only Gold & Black themed “CypherSafe Secure View” with the exact required warning text and an English error state for expired/invalid/consumed links."
+          "description": "Create a component that displays a golden/amber themed notification with the message: 'Install CypherSafe on your Desktop for a larger writing canvas.' Show the notification only when screen width >1024px (use window.matchMedia or Tailwind breakpoints). Store dismissal state in localStorage to prevent repeated display. If the browser supports PWA installation (beforeinstallprompt event), include an install button that triggers the native prompt. Otherwise, show a generic install message. Style with golden/amber colors matching the app's cyber-tech theme from frontend/src/index.css."
         },
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/components/NotesApp.tsx",
           "operation": "modify",
-          "description": "Add React Query hook(s) for opening/consuming a share record (openShareLink) to retrieve encrypted payload + nonce/IV for the receiver page, with clean English error mapping for UI rendering."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Add and wire a new router route for the secure receiver experience (e.g., /s/$shareId) that is accessible without login. Update the existing auth/lock gating so this secure view route can render for unauthenticated users (using the anonymous actor). Also ensure layout (Header/Footer) is hidden or replaced for the secure view to keep the experience distinct/professional."
-        },
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Add Gold & Black themed styles/utilities specific to the secure receiver view (background, borders, typography) and any small animations needed on that page, without altering any immutable UI library files."
+          "description": "Import and render the InstallPrompt component near the top of the notes dashboard. Position it so it's visible but not intrusive (e.g., as a banner below the header or as a dismissible toast notification)."
         }
       ]
     },
     {
       "id": "REQ-6",
-      "summary": "Show an animated success indication after clipboard copy succeeds with the exact message “Secret Link Copied to Clipboard!”.",
+      "summary": "Verify that notes saved on mobile are instantly visible on desktop using the same Internet Identity login",
       "acceptanceCriteria": [
-        "After link generation and successful clipboard write, the user sees an animated success indication (e.g., animated toast/checkmark, brief glow/pulse) and the exact English message: “Secret Link Copied to Clipboard!”.",
-        "The success feedback is triggered only after the copy operation succeeds (not merely after link generation)."
+        "Notes created or updated on one device appear immediately when refreshed on another device",
+        "Same Internet Identity principal accesses identical note data on all devices",
+        "No device-specific state isolation exists in the backend",
+        "React Query cache invalidation ensures fresh data after mutations"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/ShareLinkDialog.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "After a successful clipboard write, trigger an animated success indication and display the exact message “Secret Link Copied to Clipboard!” (and ensure it is only shown on copy success, not on mere link generation)."
-        },
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Add a small reusable animation (e.g., gold pulse/glow/checkmark animation class) to support the post-copy success feedback visual required by REQ-6."
+          "description": "Review and ensure that all note mutations (create, update, delete) properly invalidate the React Query cache for note lists and individual notes. Verify that the queryKey structure is consistent and that invalidateQueries is called after every mutation. Ensure no device-specific caching logic exists that would prevent cross-device synchronization. Add refetchOnWindowFocus: true to note list queries if not already present, so switching back to the app refetches data."
         }
       ]
     }

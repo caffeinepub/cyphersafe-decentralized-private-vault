@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCreateNote, useUpdateNote, useDeleteNote } from '../hooks/useQueries';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { toast } from 'sonner';
 import type { Note } from '../backend';
 import ShareLinkDialog from './ShareLinkDialog';
@@ -15,6 +16,7 @@ interface FullScreenEditorOverlayProps {
   onClose: () => void;
   originX: number;
   originY: number;
+  isInlineMode?: boolean;
 }
 
 // Define Web Speech API types
@@ -69,7 +71,14 @@ declare global {
   }
 }
 
-export default function FullScreenEditorOverlay({ mode, note, onClose, originX, originY }: FullScreenEditorOverlayProps) {
+export default function FullScreenEditorOverlay({ 
+  mode, 
+  note, 
+  onClose, 
+  originX, 
+  originY,
+  isInlineMode = false 
+}: FullScreenEditorOverlayProps) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [selfDestructTimer, setSelfDestructTimer] = useState<string>('none');
@@ -91,6 +100,22 @@ export default function FullScreenEditorOverlay({ mode, note, onClose, originX, 
   const { mutate: deleteNote } = useDeleteNote();
 
   const isSaving = createNoteMutation.isPending || isUpdating;
+
+  // Keyboard shortcuts for save and escape
+  useKeyboardShortcuts({
+    onCtrlS: () => {
+      if (hasChanges && !isSaving) {
+        handleSave();
+        toast.success('Note saved!', { duration: 1500 });
+      }
+    },
+    onEscape: () => {
+      if (!isInlineMode) {
+        handleClose();
+      }
+    },
+    enabled: true,
+  });
 
   // Initialize Speech Recognition
   useEffect(() => {
@@ -335,10 +360,14 @@ export default function FullScreenEditorOverlay({ mode, note, onClose, originX, 
   };
 
   const handleClose = () => {
-    setIsClosing(true);
-    setTimeout(() => {
+    if (isInlineMode) {
       onClose();
-    }, 400);
+    } else {
+      setIsClosing(true);
+      setTimeout(() => {
+        onClose();
+      }, 400);
+    }
   };
 
   const handleShareClick = () => {
@@ -347,146 +376,140 @@ export default function FullScreenEditorOverlay({ mode, note, onClose, originX, 
     }
   };
 
-  return (
+  const editorContent = (
     <>
-      {/* Full-screen overlay with center-out expansion */}
-      <div
-        className={`fixed inset-0 z-50 editor-overlay ${isClosing ? 'editor-overlay-closing' : ''}`}
-        style={{
-          '--origin-x': `${originX}px`,
-          '--origin-y': `${originY}px`,
-        } as React.CSSProperties}
-      >
-        {/* Minimalist Top Bar */}
-        <div className="editor-header">
-          <Button
-            onClick={handleClose}
-            variant="ghost"
-            size="sm"
-            className="editor-back-button"
-            aria-label="Close editor"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
+      {/* Minimalist Top Bar */}
+      <div className="editor-header">
+        <Button
+          onClick={handleClose}
+          variant="ghost"
+          size="sm"
+          className="editor-back-button rounded-full p-2"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
 
-          <div className="editor-session-label">
-            ENCRYPTED SESSION
-          </div>
+        <span className="editor-session-label">
+          {mode === 'create' ? 'NEW SESSION' : 'EDIT SESSION'}
+        </span>
 
-          <div className="flex items-center gap-2">
-            {mode === 'edit' && note && (
-              <Button
-                onClick={handleShareClick}
-                variant="ghost"
-                size="sm"
-                className="editor-share-button"
-                aria-label="Share note"
-              >
-                <Share2 className="w-5 h-5" />
-              </Button>
-            )}
+        <div className="flex items-center gap-2">
+          {mode === 'edit' && note && (
             <Button
-              onClick={handleSave}
-              disabled={!hasChanges || !content.trim() || isSaving}
+              onClick={handleShareClick}
               variant="ghost"
               size="sm"
-              className={`editor-save-button ${showSaveGlow && hasChanges ? 'editor-save-glow' : ''}`}
-              aria-label="Save note"
+              className="editor-share-button rounded-full p-2"
             >
-              {isSaving ? (
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-solid border-gold border-r-transparent"></div>
-              ) : (
-                <Save className="w-5 h-5" />
-              )}
+              <Share2 className="w-5 h-5" />
             </Button>
-          </div>
+          )}
+          <Button
+            onClick={handleSave}
+            disabled={!hasChanges || isSaving}
+            variant="ghost"
+            size="sm"
+            className={`editor-save-button rounded-full p-2 ${showSaveGlow ? 'editor-save-glow' : ''}`}
+          >
+            <Save className="w-5 h-5" />
+          </Button>
         </div>
+      </div>
 
-        {/* Boundless Writing Canvas */}
-        <div className="editor-content-wrapper">
-          <div className="editor-content-container">
-            {/* Title Input */}
-            <Input
-              ref={titleInputRef}
-              type="text"
-              placeholder="Note title..."
-              value={title}
-              onChange={handleTitleChange}
-              disabled={mode === 'edit' || isSaving}
-              className="editor-title-input"
-            />
+      {/* Editor Content */}
+      <div className="editor-content-wrapper">
+        <div className="editor-content-container">
+          {/* Title Input */}
+          <Input
+            ref={titleInputRef}
+            type="text"
+            placeholder="Untitled Note"
+            value={title}
+            onChange={handleTitleChange}
+            className="editor-title-input"
+            disabled={mode === 'edit'}
+          />
 
-            {/* Content Textarea */}
-            <Textarea
-              ref={textareaRef}
-              placeholder="Start writing your encrypted note..."
-              value={content}
-              onChange={handleContentChange}
-              disabled={isSaving}
-              className="editor-textarea"
-            />
+          {/* Content Textarea */}
+          <Textarea
+            ref={textareaRef}
+            placeholder="Start writing your encrypted note..."
+            value={content}
+            onChange={handleContentChange}
+            className="editor-textarea"
+          />
 
-            {/* Self-Destruct Timer Selector */}
-            <div className="editor-timer-section">
-              <label htmlFor="timer-select" className="editor-timer-label">
-                Self-Destruct Timer
-              </label>
-              <Select value={selfDestructTimer} onValueChange={setSelfDestructTimer}>
-                <SelectTrigger 
-                  id="timer-select"
-                  className="editor-timer-select"
-                >
-                  <SelectValue placeholder="Select timer duration" />
-                </SelectTrigger>
-                <SelectContent className="editor-timer-dropdown">
-                  <SelectItem value="none">No Timer</SelectItem>
-                  <SelectItem value="1hour">1 Hour</SelectItem>
-                  <SelectItem value="1day">1 Day</SelectItem>
-                  <SelectItem value="1week">1 Week</SelectItem>
-                  <SelectItem value="1month">1 Month</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Self-Destruct Timer */}
+          <div className="editor-timer-section">
+            <label className="editor-timer-label">Self-Destruct Timer</label>
+            <Select value={selfDestructTimer} onValueChange={setSelfDestructTimer}>
+              <SelectTrigger className="editor-timer-select">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="editor-timer-dropdown">
+                <SelectItem value="none">No Timer</SelectItem>
+                <SelectItem value="1hour">1 Hour</SelectItem>
+                <SelectItem value="1day">1 Day</SelectItem>
+                <SelectItem value="1week">1 Week</SelectItem>
+                <SelectItem value="1month">1 Month</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-            {/* Voice Controls */}
-            {recognitionRef.current && (
-              <div className="editor-voice-controls">
-                <Button
-                  onClick={toggleLanguage}
-                  disabled={isSaving}
-                  size="sm"
-                  variant="ghost"
-                  className="editor-language-button"
-                >
-                  {language === 'en-IN' ? 'EN' : 'HI'}
-                </Button>
-                <Button
-                  onClick={toggleVoiceRecording}
-                  disabled={isSaving}
-                  size="sm"
-                  variant="ghost"
-                  className={`editor-voice-button ${isListening ? 'editor-voice-active' : ''}`}
-                >
-                  {isListening ? 'Stop Voice' : 'Voice Dictation'}
-                </Button>
-                {isListening && (
-                  <span className="editor-listening-indicator">
-                    Listening ({language === 'en-IN' ? 'English' : 'Hindi'})...
-                  </span>
-                )}
-              </div>
+          {/* Voice Controls */}
+          <div className="editor-voice-controls">
+            <Button
+              onClick={toggleLanguage}
+              variant="outline"
+              size="sm"
+              className="editor-language-button"
+            >
+              {language === 'en-IN' ? '🇬🇧 English' : '🇮🇳 हिंदी'}
+            </Button>
+            <Button
+              onClick={toggleVoiceRecording}
+              variant="outline"
+              size="sm"
+              className={`editor-voice-button ${isListening ? 'editor-voice-active' : ''}`}
+            >
+              🎤 {isListening ? 'Stop' : 'Voice'}
+            </Button>
+            {isListening && (
+              <span className="editor-listening-indicator">Listening...</span>
             )}
           </div>
         </div>
       </div>
 
-      {/* Share Link Dialog */}
-      {showShareDialog && note && (
+      {/* Share Dialog */}
+      {showShareDialog && mode === 'edit' && note && (
         <ShareLinkDialog
           note={note}
           onClose={() => setShowShareDialog(false)}
         />
       )}
     </>
+  );
+
+  if (isInlineMode) {
+    // Inline mode for desktop - no overlay animation
+    return (
+      <div className="h-full flex flex-col bg-background">
+        {editorContent}
+      </div>
+    );
+  }
+
+  // Overlay mode for mobile - with animation
+  return (
+    <div
+      className={`fixed inset-0 z-50 editor-overlay ${isClosing ? 'editor-overlay-closing' : ''}`}
+      style={{
+        '--origin-x': `${originX}px`,
+        '--origin-y': `${originY}px`,
+      } as React.CSSProperties}
+    >
+      {editorContent}
+    </div>
   );
 }

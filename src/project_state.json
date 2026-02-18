@@ -1,48 +1,58 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Notes app with secure secret-link sharing (CypherSafe) including encrypted URLs, view-once and timed-expiry options, and a branded secure viewing page.",
+  "summary": "CypherSafe: A secure note-taking app with encrypted storage on ICP blockchain, optimized for both mobile and desktop use with responsive design and keyboard shortcuts",
   "architectural_notes": [
-    "Secret-link sharing requires generating unique encrypted URLs per note with server-side storage to enforce view-once deletion and timed expiry (1h/24h)."
+    "Uses ICP blockchain for encrypted note storage and cross-device sync",
+    "Responsive breakpoint at 1024px for desktop optimization",
+    "Focus mode provides distraction-free full-screen editing"
   ],
   "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-add-a-golden-share-icon-button-paper-plane-or-link-symbol-to-the-top-right-of-the-note-view-edit-screen-the-full-screen-note-overlay-when-viewing-an-existing-note-clicking-it-must-open-sharing-options-for-the-currently-open-note",
-      "title": "Add a golden “Share” icon button (paper plane or link symbol) to the top-right of the note view/edit screen (the full-screen note overlay when viewing an existing note). Clicking it must open sharing options for the currently open note.",
+      "id": "feature-implement-responsive-side-by-side-layout-for-screens-wider-than-1024px-left-panel-displays-the-notes-list-right-panel-displays-the-full-screen-editor-focus-mode",
+      "title": "Implement responsive side-by-side layout for screens wider than 1024px: left panel displays the notes list, right panel displays the full-screen editor (focus mode)",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-the-share-options-pop-up-with-exactly-these-choices-1-view-once-link-becomes-unusable-after-the-first-successful-open-and-the-shared-payload-is-deleted-from-the-canister-s-share-storage-2-timed-expiry-with-selectable-durations-1-hour-and-24-hours-after-the-user-selects-an-option-generate-a-secret-link-and-copy-it-to-clipboard",
-      "title": "Implement the share options pop-up with exactly these choices: (1) “View Once” (link becomes unusable after the first successful open and the shared payload is deleted from the canister’s share storage), (2) “Timed Expiry” with selectable durations “1 hour” and “24 hours”. After the user selects an option, generate a secret link and copy it to clipboard.",
+      "id": "feature-add-keyboard-shortcut-ctrl-n-to-create-a-new-note",
+      "title": "Add keyboard shortcut Ctrl+N to create a new note",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-generate-a-unique-encrypted-url-for-a-specific-note-using-client-side-encryption-encrypt-the-note-payload-in-the-browser-store-only-ciphertext-plus-any-required-non-secret-parameters-like-iv-in-the-backend-share-store-and-put-the-decryption-key-only-in-the-url-hash-fragment-so-it-is-not-sent-to-the-canister-in-requests",
-      "title": "Generate a unique encrypted URL for a specific note using client-side encryption: encrypt the note payload in the browser, store only ciphertext (plus any required non-secret parameters like IV) in the backend share store, and put the decryption key only in the URL hash fragment so it is not sent to the canister in requests.",
+      "id": "feature-add-keyboard-shortcut-ctrl-s-to-save-the-current-note",
+      "title": "Add keyboard shortcut Ctrl+S to save the current note",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     },
     {
-      "id": "feature-frontend-add-a-receiver-route-page-that-renders-a-professional-cyphersafe-secure-view-experience-in-a-gold-black-theme-when-a-receiver-opens-a-secret-link-the-page-must-fetch-the-encrypted-payload-using-the-shareid-decrypt-it-using-the-key-from-the-url-hash-fragment-display-the-note-content-in-a-read-only-secure-view-and-show-the-warning-text-this-note-is-encrypted-and-will-self-destruct-after-viewing",
-      "title": "Frontend: add a receiver route/page that renders a professional “CypherSafe Secure View” experience in a Gold & Black theme. When a receiver opens a secret link, the page must: fetch the encrypted payload using the shareId, decrypt it using the key from the URL hash fragment, display the note content in a read-only secure view, and show the warning text: “This note is encrypted and will self-destruct after viewing.”",
+      "id": "feature-add-keyboard-shortcut-esc-to-exit-focus-mode-editor",
+      "title": "Add keyboard shortcut Esc to exit focus mode editor",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-a-golden-notification-prompting-desktop-users-to-install-cyphersafe-with-the-message-install-cyphersafe-on-your-desktop-for-a-larger-writing-canvas",
+      "title": "Display a golden notification prompting desktop users to install CypherSafe with the message: 'Install CypherSafe on your Desktop for a larger writing canvas.'",
       "reqIds": [
         "REQ-5"
       ],
       "version": 1
     },
     {
-      "id": "feature-visual-feedback-after-successfully-copying-a-generated-secret-link-show-a-success-animation-and-the-exact-message-secret-link-copied-to-clipboard",
-      "title": "Visual feedback: after successfully copying a generated secret link, show a success animation and the exact message “Secret Link Copied to Clipboard!”.",
+      "id": "feature-verify-that-notes-saved-on-mobile-via-icp-blockchain-are-instantly-visible-on-the-pc-version-using-the-same-internet-identity-login",
+      "title": "Verify that notes saved on mobile via ICP blockchain are instantly visible on the PC version using the same Internet Identity login",
       "reqIds": [
         "REQ-6"
       ],
@@ -52,16 +62,26 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Add secure 'Share as Secret Link' for notes: top-right golden Share icon; generate unique encrypted URL; popup options for View Once (expires on first open and deletes from share-server) or Timed Expiry (1h/24h); receiver sees branded 'CypherSafe Secure View' page (gold/black) with self-destruct warning; show 'Secret Link Copied to Clipboard!' success animation.",
+      "summary": "Responsive side-by-side layout for desktop (>1024px): left panel with note list, right panel with full-screen editor",
       "reqIds": [],
       "status": "pending"
     },
     {
-      "id": "AR-5",
-      "summary": "Backend: add share-link storage and APIs to create and open shared-note links. Creating a link must store encrypted payload + metadata (createdAt, expiresAt, viewOnce). Opening a link must enforce expiry. For “View Once”, the first successful open must delete the shared payload so subsequent opens fail.",
-      "reqIds": [
-        "REQ-4"
-      ],
+      "id": "AR-2",
+      "summary": "PC keyboard shortcuts: Ctrl+N (new note), Ctrl+S (save), Esc (exit focus mode)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Desktop install prompt with golden notification for desktop browsers",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Cloud sync via ICP blockchain ensuring notes are instantly visible across mobile and PC with same login",
+      "reqIds": [],
       "status": "pending"
     }
   ],

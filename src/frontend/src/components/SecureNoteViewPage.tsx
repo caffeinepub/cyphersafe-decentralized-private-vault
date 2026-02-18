@@ -11,11 +11,15 @@ export default function SecureNoteViewPage() {
   const [error, setError] = useState<string | null>(null);
   const [isDecrypting, setIsDecrypting] = useState(true);
 
-  const { data: encryptedData, isLoading, error: fetchError } = useOpenShareLink(shareId);
+  const openShareLinkMutation = useOpenShareLink();
 
   useEffect(() => {
-    const decryptContent = async () => {
-      if (!encryptedData) return;
+    const fetchAndDecrypt = async () => {
+      if (!shareId) {
+        setError('Invalid link: Missing share ID');
+        setIsDecrypting(false);
+        return;
+      }
 
       try {
         // Extract decryption key from URL hash
@@ -27,37 +31,33 @@ export default function SecureNoteViewPage() {
           return;
         }
 
+        // Fetch encrypted data from backend
+        const encryptedData = await openShareLinkMutation.mutateAsync(shareId);
+
         // Decrypt the note content
         const [encryptedNote, nonce] = encryptedData;
         const decrypted = await decryptNote(encryptedNote, nonce, key);
         setDecryptedContent(decrypted);
         setIsDecrypting(false);
-      } catch (err) {
-        console.error('Decryption error:', err);
-        setError('Failed to decrypt note. The link may be invalid or corrupted.');
+      } catch (err: any) {
+        console.error('Error fetching or decrypting note:', err);
+        const errorMessage = err.message || 'Unknown error';
+        
+        if (errorMessage.includes('expired')) {
+          setError('This link has expired and is no longer available.');
+        } else if (errorMessage.includes('not found')) {
+          setError('This link is invalid or has already been used.');
+        } else if (errorMessage.includes('view-once')) {
+          setError('This was a view-once link and has already been accessed.');
+        } else {
+          setError('Failed to load the shared note. The link may be invalid.');
+        }
         setIsDecrypting(false);
       }
     };
 
-    decryptContent();
-  }, [encryptedData]);
-
-  // Handle fetch errors
-  useEffect(() => {
-    if (fetchError) {
-      const errorMessage = fetchError.message || 'Unknown error';
-      if (errorMessage.includes('expired')) {
-        setError('This link has expired and is no longer available.');
-      } else if (errorMessage.includes('not found')) {
-        setError('This link is invalid or has already been used.');
-      } else if (errorMessage.includes('view-once')) {
-        setError('This was a view-once link and has already been accessed.');
-      } else {
-        setError('Failed to load the shared note. The link may be invalid.');
-      }
-      setIsDecrypting(false);
-    }
-  }, [fetchError]);
+    fetchAndDecrypt();
+  }, [shareId]);
 
   return (
     <div className="secure-view-page">
@@ -80,7 +80,7 @@ export default function SecureNoteViewPage() {
 
         {/* Content Area */}
         <div className="secure-view-content">
-          {isLoading || isDecrypting ? (
+          {openShareLinkMutation.isPending || isDecrypting ? (
             <div className="secure-view-loading">
               <div className="h-12 w-12 animate-spin rounded-full border-4 border-solid border-gold border-r-transparent"></div>
               <p className="mt-4 text-gold">Decrypting secure note...</p>
