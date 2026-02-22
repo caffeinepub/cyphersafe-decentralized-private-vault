@@ -1,87 +1,103 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "CypherSafe: A secure note-taking app with encrypted storage on ICP blockchain, optimized for both mobile and desktop use with responsive design and keyboard shortcuts",
+  "summary": "CypherSafe: A secure blockchain-based note-taking app with recovery system using 12-word phrases and QR codes",
   "architectural_notes": [
-    "Uses ICP blockchain for encrypted note storage and cross-device sync",
-    "Responsive breakpoint at 1024px for desktop optimization",
-    "Focus mode provides distraction-free full-screen editing"
+    "12-word mnemonic phrase (BIP39) or QR code for master key generation",
+    "Client-side key derivation for blockchain note encryption",
+    "Black & Gold themed premium UI for vault card display",
+    "QR code scanning capability for cross-device sync",
+    "PDF generation with password protection for key export"
   ],
   "known_issues": [],
   "isFixRequest": false,
-  "existing_features": [
-    {
-      "id": "feature-implement-responsive-side-by-side-layout-for-screens-wider-than-1024px-left-panel-displays-the-notes-list-right-panel-displays-the-full-screen-editor-focus-mode",
-      "title": "Implement responsive side-by-side layout for screens wider than 1024px: left panel displays the notes list, right panel displays the full-screen editor (focus mode)",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-keyboard-shortcut-ctrl-n-to-create-a-new-note",
-      "title": "Add keyboard shortcut Ctrl+N to create a new note",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-keyboard-shortcut-ctrl-s-to-save-the-current-note",
-      "title": "Add keyboard shortcut Ctrl+S to save the current note",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-keyboard-shortcut-esc-to-exit-focus-mode-editor",
-      "title": "Add keyboard shortcut Esc to exit focus mode editor",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-display-a-golden-notification-prompting-desktop-users-to-install-cyphersafe-with-the-message-install-cyphersafe-on-your-desktop-for-a-larger-writing-canvas",
-      "title": "Display a golden notification prompting desktop users to install CypherSafe with the message: 'Install CypherSafe on your Desktop for a larger writing canvas.'",
-      "reqIds": [
-        "REQ-5"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-verify-that-notes-saved-on-mobile-via-icp-blockchain-are-instantly-visible-on-the-pc-version-using-the-same-internet-identity-login",
-      "title": "Verify that notes saved on mobile via ICP blockchain are instantly visible on the PC version using the same Internet Identity login",
-      "reqIds": [
-        "REQ-6"
-      ],
-      "version": 1
-    }
-  ],
+  "imageRequirements": "## Required Images\n- Premium Black & Gold fortress lock icon for Vault Card header (vault-card-lock.dim_128x128.png)",
+  "existing_features": [],
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Responsive side-by-side layout for desktop (>1024px): left panel with note list, right panel with full-screen editor",
+      "summary": "Generate Golden 12-Word Phrase or Master QR Code on first setup",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "PC keyboard shortcuts: Ctrl+N (new note), Ctrl+S (save), Esc (exit focus mode)",
+      "summary": "Design premium Black & Gold Vault Card displaying master key with security message",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "Desktop install prompt with golden notification for desktop browsers",
+      "summary": "Add 'Scan to Sync' option on login screen for QR scanning or manual 12-word entry",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-4",
-      "summary": "Cloud sync via ICP blockchain ensuring notes are instantly visible across mobile and PC with same login",
+      "summary": "Display security warning before showing master key about data recovery limitations",
       "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Export master key as password-protected PDF or high-resolution printable image",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Generate a 12-word mnemonic phrase (BIP39 standard) and corresponding Master QR Code during first-time user setup, after profile creation but before the main vault interface is shown",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Design a premium 'Vault Card' component with Black & Gold theme displaying the master key (12-word phrase and QR code), including the security message: 'Your Master Key to the Fortress. Keep it offline. Keep it secret.'",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Show a security warning dialog before displaying the master key that states: 'This is the only way to recover your data. If lost, even I cannot open your vault.'",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Add 'Scan to Sync' option on the login screen allowing users to restore their vault by either scanning the Master QR Code or manually entering the 12-word phrase",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Implement export functionality allowing users to save the Master Key as a password-protected PDF or high-resolution printable image",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Store the 12-word phrase securely in the backend associated with the user's Principal identity to enable recovery verification and vault restoration",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Integrate the master key display into the onboarding flow after ProfileSetup completion, showing the security warning followed by the Vault Card with export options",
+      "reqIds": [
+        "REQ-7"
+      ],
       "status": "pending"
     }
   ],

@@ -59,6 +59,15 @@ actor {
   let userProfiles = Map.empty<Principal, UserProfile>();
   let userExtendedNotes = Map.empty<Principal, Map.Map<Text, ExtendedNote>>();
 
+  // New Persistent Recovery Data Type
+  type PersistentRecoveryData = {
+    mnemonic : Text;
+    creationTime : Time.Time;
+  };
+
+  // Safe Vault Recovery Data Store
+  let persistentRecoveryStore = Map.empty<Principal, PersistentRecoveryData>();
+
   // ShareLink type
   public type ShareLink = {
     encryptedNote : Blob;
@@ -71,6 +80,47 @@ actor {
 
   // Share links map
   let shareLinks = Map.empty<Text, ShareLink>();
+
+  // Persistent Recovery Data Management
+  public shared ({ caller }) func storePersistentRecoveryData(mnemonic : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can store recovery data");
+    };
+
+    let persistentRecoveryData : PersistentRecoveryData = {
+      mnemonic;
+      creationTime = Time.now();
+    };
+
+    persistentRecoveryStore.add(caller, persistentRecoveryData);
+  };
+
+  public query ({ caller }) func retrievePersistentRecoveryPhrase() : async Text {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can retrieve recovery phrases");
+    };
+
+    switch (persistentRecoveryStore.get(caller)) {
+      case (null) { Runtime.trap("Persistent recovery phrase not found") };
+      case (?data) { data.mnemonic };
+    };
+  };
+
+  public query ({ caller }) func listPersistentRecoveryData() : async [(Principal, PersistentRecoveryData)] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can access persistent recovery store");
+    };
+
+    persistentRecoveryStore.toArray();
+  };
+
+  public shared ({ caller }) func clearPersistentRecoveryData() : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can clear recovery data");
+    };
+
+    persistentRecoveryStore.remove(caller);
+  };
 
   // User Profile Management Functions
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
@@ -486,7 +536,7 @@ actor {
     );
   };
 
-  // Share link functions - FIXED AUTHORIZATION
+  // Share link functions
   // Creating a share link requires authentication (only users can create)
   public shared ({ caller }) func createShareLink(encryptedNote : Blob, nonce : Blob, expiresAt : ?Int, viewOnce : Bool) : async Text {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {

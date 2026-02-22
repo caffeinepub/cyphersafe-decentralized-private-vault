@@ -89,9 +89,16 @@ export class ExternalBlob {
         return this;
     }
 }
-export interface _CaffeineStorageRefillResult {
-    success?: boolean;
-    topped_up_amount?: bigint;
+export interface Note {
+    title: string;
+    selfDestructAt?: bigint;
+    content: string;
+    createdAt: bigint;
+    lastModified: bigint;
+}
+export interface PersistentRecoveryData {
+    creationTime: Time;
+    mnemonic: string;
 }
 export interface ExtendedNote {
     title: string;
@@ -101,6 +108,7 @@ export interface ExtendedNote {
     createdAt: bigint;
     lastModified: bigint;
 }
+export type Time = bigint;
 export interface _CaffeineStorageRefillInformation {
     proposed_top_up_amount?: bigint;
 }
@@ -119,12 +127,9 @@ export interface UserProfile {
     muteGreeting: boolean;
     isFirstTimeUser: boolean;
 }
-export interface Note {
-    title: string;
-    selfDestructAt?: bigint;
-    content: string;
-    createdAt: bigint;
-    lastModified: bigint;
+export interface _CaffeineStorageRefillResult {
+    success?: boolean;
+    topped_up_amount?: bigint;
 }
 export enum UserRole {
     admin = "admin",
@@ -141,6 +146,7 @@ export interface backendInterface {
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     cleanupExpiredShareLinks(): Promise<void>;
+    clearPersistentRecoveryData(): Promise<void>;
     createExtendedNote(noteInput: ExtendedNoteInput): Promise<void>;
     createNote(title: string, content: string, selfDestructAt: bigint | null): Promise<void>;
     createShareLink(encryptedNote: Uint8Array, nonce: Uint8Array, expiresAt: bigint | null, viewOnce: boolean): Promise<string>;
@@ -157,15 +163,18 @@ export interface backendInterface {
     getNote(title: string): Promise<Note>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
+    listPersistentRecoveryData(): Promise<Array<[Principal, PersistentRecoveryData]>>;
     markWelcomePopupSeen(): Promise<void>;
     migrate(): Promise<void>;
     openShareLink(shareId: string): Promise<[Uint8Array, Uint8Array]>;
+    retrievePersistentRecoveryPhrase(): Promise<string>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     searchExtendedNotes(searchTerm: string): Promise<Array<ExtendedNote>>;
     searchNotes(searchTerm: string): Promise<Array<Note>>;
     setExtendedNoteSelfDestructTimer(title: string, durationSeconds: bigint): Promise<void>;
     setMuteGreetingPreference(mute: boolean): Promise<void>;
     setSelfDestructTimer(title: string, durationSeconds: bigint): Promise<void>;
+    storePersistentRecoveryData(mnemonic: string): Promise<void>;
     updateExtendedNote(title: string, newContent: string, newSelfDestructAt: bigint | null, newImagePath: ExternalBlob | null): Promise<void>;
     updateNote(title: string, newContent: string, newSelfDestructAt: bigint | null): Promise<void>;
 }
@@ -295,6 +304,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.cleanupExpiredShareLinks();
+            return result;
+        }
+    }
+    async clearPersistentRecoveryData(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.clearPersistentRecoveryData();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.clearPersistentRecoveryData();
             return result;
         }
     }
@@ -522,6 +545,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async listPersistentRecoveryData(): Promise<Array<[Principal, PersistentRecoveryData]>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listPersistentRecoveryData();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listPersistentRecoveryData();
+            return result;
+        }
+    }
     async markWelcomePopupSeen(): Promise<void> {
         if (this.processError) {
             try {
@@ -568,6 +605,20 @@ export class Backend implements backendInterface {
                 result[0],
                 result[1]
             ];
+        }
+    }
+    async retrievePersistentRecoveryPhrase(): Promise<string> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.retrievePersistentRecoveryPhrase();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.retrievePersistentRecoveryPhrase();
+            return result;
         }
     }
     async saveCallerUserProfile(arg0: UserProfile): Promise<void> {
@@ -651,6 +702,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.setSelfDestructTimer(arg0, arg1);
+            return result;
+        }
+    }
+    async storePersistentRecoveryData(arg0: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.storePersistentRecoveryData(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.storePersistentRecoveryData(arg0);
             return result;
         }
     }

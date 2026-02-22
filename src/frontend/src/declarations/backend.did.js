@@ -51,6 +51,11 @@ export const UserProfile = IDL.Record({
   'muteGreeting' : IDL.Bool,
   'isFirstTimeUser' : IDL.Bool,
 });
+export const Time = IDL.Int;
+export const PersistentRecoveryData = IDL.Record({
+  'creationTime' : Time,
+  'mnemonic' : IDL.Text,
+});
 
 export const idlService = IDL.Service({
   '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -82,6 +87,7 @@ export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'cleanupExpiredShareLinks' : IDL.Func([], [], []),
+  'clearPersistentRecoveryData' : IDL.Func([], [], []),
   'createExtendedNote' : IDL.Func([ExtendedNoteInput], [], []),
   'createNote' : IDL.Func([IDL.Text, IDL.Text, IDL.Opt(IDL.Int)], [], []),
   'createShareLink' : IDL.Func(
@@ -106,6 +112,11 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'listPersistentRecoveryData' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Tuple(IDL.Principal, PersistentRecoveryData))],
+      ['query'],
+    ),
   'markWelcomePopupSeen' : IDL.Func([], [], []),
   'migrate' : IDL.Func([], [], []),
   'openShareLink' : IDL.Func(
@@ -113,6 +124,7 @@ export const idlService = IDL.Service({
       [IDL.Vec(IDL.Nat8), IDL.Vec(IDL.Nat8)],
       [],
     ),
+  'retrievePersistentRecoveryPhrase' : IDL.Func([], [IDL.Text], ['query']),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'searchExtendedNotes' : IDL.Func(
       [IDL.Text],
@@ -123,6 +135,7 @@ export const idlService = IDL.Service({
   'setExtendedNoteSelfDestructTimer' : IDL.Func([IDL.Text, IDL.Int], [], []),
   'setMuteGreetingPreference' : IDL.Func([IDL.Bool], [], []),
   'setSelfDestructTimer' : IDL.Func([IDL.Text, IDL.Int], [], []),
+  'storePersistentRecoveryData' : IDL.Func([IDL.Text], [], []),
   'updateExtendedNote' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Opt(IDL.Int), IDL.Opt(ExternalBlob)],
       [],
@@ -177,6 +190,11 @@ export const idlFactory = ({ IDL }) => {
     'muteGreeting' : IDL.Bool,
     'isFirstTimeUser' : IDL.Bool,
   });
+  const Time = IDL.Int;
+  const PersistentRecoveryData = IDL.Record({
+    'creationTime' : Time,
+    'mnemonic' : IDL.Text,
+  });
   
   return IDL.Service({
     '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -208,6 +226,7 @@ export const idlFactory = ({ IDL }) => {
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'cleanupExpiredShareLinks' : IDL.Func([], [], []),
+    'clearPersistentRecoveryData' : IDL.Func([], [], []),
     'createExtendedNote' : IDL.Func([ExtendedNoteInput], [], []),
     'createNote' : IDL.Func([IDL.Text, IDL.Text, IDL.Opt(IDL.Int)], [], []),
     'createShareLink' : IDL.Func(
@@ -232,6 +251,11 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'listPersistentRecoveryData' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(IDL.Principal, PersistentRecoveryData))],
+        ['query'],
+      ),
     'markWelcomePopupSeen' : IDL.Func([], [], []),
     'migrate' : IDL.Func([], [], []),
     'openShareLink' : IDL.Func(
@@ -239,6 +263,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Nat8), IDL.Vec(IDL.Nat8)],
         [],
       ),
+    'retrievePersistentRecoveryPhrase' : IDL.Func([], [IDL.Text], ['query']),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'searchExtendedNotes' : IDL.Func(
         [IDL.Text],
@@ -249,6 +274,7 @@ export const idlFactory = ({ IDL }) => {
     'setExtendedNoteSelfDestructTimer' : IDL.Func([IDL.Text, IDL.Int], [], []),
     'setMuteGreetingPreference' : IDL.Func([IDL.Bool], [], []),
     'setSelfDestructTimer' : IDL.Func([IDL.Text, IDL.Int], [], []),
+    'storePersistentRecoveryData' : IDL.Func([IDL.Text], [], []),
     'updateExtendedNote' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Opt(IDL.Int), IDL.Opt(ExternalBlob)],
         [],

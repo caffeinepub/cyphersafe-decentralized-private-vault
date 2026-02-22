@@ -1,119 +1,145 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Optimize CypherSafe for Desktop with Responsive Layout and Keyboard Shortcuts",
+  "title": "Add Secure Recovery System with 12-Word Phrase and Master QR Code",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Implement responsive side-by-side layout for screens wider than 1024px with notes list on left and full-screen editor on right",
+      "summary": "Generate a 12-word mnemonic phrase (BIP39 standard) and corresponding Master QR Code during first-time user setup",
       "acceptanceCriteria": [
-        "On screens wider than 1024px, NotesApp.tsx displays a two-column layout",
-        "Left column shows the NotesList component",
-        "Right column shows the FullScreenEditorOverlay component embedded inline (not as an overlay)",
-        "Layout remains stacked/single-column on screens 1024px or narrower"
+        "12-word phrase is generated using cryptographically secure randomness",
+        "Master QR Code encodes the same 12-word phrase",
+        "Generation happens once per user, during initial setup flow",
+        "Both phrase and QR code are derived from the same seed"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/NotesApp.tsx",
-          "operation": "modify",
-          "description": "Add responsive layout logic: wrap the component in a container that displays as a two-column grid on screens >1024px using Tailwind breakpoints (lg:grid lg:grid-cols-2). On desktop, embed FullScreenEditorOverlay inline in the right column instead of rendering it as a fixed overlay. On mobile (≤1024px), maintain the existing stacked layout with the overlay behavior. Ensure selectedNote state properly controls which note is displayed in the right panel."
+          "path": "frontend/src/utils/mnemonicGenerator.ts",
+          "operation": "create",
+          "description": "Create utility module for generating BIP39-compliant 12-word mnemonic phrases using the Web Crypto API for cryptographically secure randomness. Include functions to generate mnemonic, convert to QR-compatible format, and validate phrase format. Do not implement backend storage here."
         },
         {
-          "path": "frontend/src/components/FullScreenEditorOverlay.tsx",
-          "operation": "modify",
-          "description": "Add a prop to control whether the editor renders as an overlay (mobile) or inline panel (desktop). When inline mode is active (>1024px), remove fixed positioning and overlay backdrop, and render as a standard scrollable panel. Preserve all existing editor functionality including speech-to-text, animations, and self-destruct settings regardless of display mode."
+          "path": "frontend/src/utils/qrCodeGenerator.ts",
+          "operation": "create",
+          "description": "Create utility module for generating QR codes from mnemonic phrases using a QR code generation library (e.g., qrcode or qrcode.react). Include functions to generate QR code data URL from text and configure error correction level for premium quality output."
+        },
+        {
+          "path": "frontend/src/hooks/useRecoveryGeneration.ts",
+          "operation": "create",
+          "description": "Create React hook that orchestrates recovery phrase generation during first-time setup. Hook should check if user already has recovery data via backend query, generate new phrase if needed, call backend to store the phrase, and return generated phrase, QR code data URL, and loading/error states. Use useQuery and useMutation from React Query."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Add keyboard shortcut Ctrl+N to create a new note",
+      "summary": "Design a premium 'Vault Card' component with Black & Gold theme displaying the master key (12-word phrase and QR code)",
       "acceptanceCriteria": [
-        "Pressing Ctrl+N anywhere in the app triggers note creation",
-        "Shortcut opens the full-screen editor for a new note",
-        "Shortcut only activates when user is authenticated"
+        "Card uses black background with gold accents matching premium aesthetic",
+        "Displays 12-word phrase in readable format (e.g., numbered grid)",
+        "Shows QR code prominently on the card",
+        "Includes exact security message text",
+        "Card design feels elegant and high-security"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useKeyboardShortcuts.ts",
+          "path": "frontend/src/components/VaultCard.tsx",
           "operation": "create",
-          "description": "Create a custom hook that listens for keyboard shortcuts using useEffect with document event listeners. Support Ctrl+N (create new note), Ctrl+S (save note), and Esc (exit editor). Accept callback props for each shortcut action. Prevent default browser behavior for Ctrl+S. Only activate shortcuts when user is authenticated (check via useInternetIdentity)."
-        },
-        {
-          "path": "frontend/src/components/NotesApp.tsx",
-          "operation": "modify",
-          "description": "Import and use the useKeyboardShortcuts hook. Wire Ctrl+N to trigger the same logic as the create note button (set selectedNote to null and open editor). Ensure the shortcut only works when the user is authenticated."
+          "description": "Create premium Vault Card component with Black & Gold theme using Cyber-Tech styling from existing index.css. Display 12-word mnemonic in a numbered 3x4 or 4x3 grid format with clear numbering (1-12), render QR code image using data URL, display the exact security message 'Your Master Key to the Fortress. Keep it offline. Keep it secret.' Include the generated vault-card-lock.dim_128x128.png icon at the card header using workspace path frontend/public/assets/generated/vault-card-lock.dim_128x128.png. Use glass morphism effects, neon borders, and gold accents consistent with existing UI theme. Accept props for mnemonic phrase and QR code data URL."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Add keyboard shortcut Ctrl+S to save the current note",
+      "summary": "Show a security warning dialog before displaying the master key",
       "acceptanceCriteria": [
-        "Pressing Ctrl+S while editing a note triggers the save mutation",
-        "Default browser save behavior is prevented",
-        "Visual feedback confirms save action"
+        "Warning appears before the Vault Card is revealed",
+        "Contains exact warning text provided",
+        "User must acknowledge/confirm before proceeding",
+        "Warning emphasizes the critical importance of the key"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/FullScreenEditorOverlay.tsx",
-          "operation": "modify",
-          "description": "Import and use the useKeyboardShortcuts hook (created in REQ-2). Wire Ctrl+S to trigger the handleSave function that already exists in this component. Ensure preventDefault is called to block browser save dialog. Add visual feedback (e.g., brief success message or animation) when save completes."
+          "path": "frontend/src/components/RecoveryWarningDialog.tsx",
+          "operation": "create",
+          "description": "Create modal dialog component using shadcn/ui Dialog that displays the exact security warning text: 'This is the only way to recover your data. If lost, even I cannot open your vault.' Use Cyber-Tech styling with high-contrast warning colors (gold/red accents). Include prominent 'I Understand' confirmation button that must be clicked to proceed to Vault Card display. Dialog should be dismissible only via the confirmation button, not by clicking outside or pressing Escape."
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Add keyboard shortcut Esc to exit focus mode editor",
+      "summary": "Add 'Scan to Sync' option on the login screen allowing users to restore their vault by scanning QR Code or entering 12-word phrase",
       "acceptanceCriteria": [
-        "Pressing Esc closes the full-screen editor overlay",
-        "On desktop (>1024px), Esc clears the selected note and returns to notes list only",
-        "Shortcut only works when editor is active"
+        "Login screen includes 'Scan to Sync' button/option",
+        "QR scanner interface allows camera-based scanning",
+        "Manual entry option accepts 12-word phrase input",
+        "Both methods restore full vault access when valid key is provided",
+        "Invalid keys show clear error messages"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/FullScreenEditorOverlay.tsx",
+          "path": "frontend/src/components/RecoveryRestoreDialog.tsx",
+          "operation": "create",
+          "description": "Create modal dialog component for vault restoration with two tabs/modes: 'Scan QR Code' and 'Enter Phrase'. For QR scanning, use the qr-code/useQRScanner hook (verify the component's usage instructions before implementing). Display camera preview, handle scanned QR results, and extract mnemonic phrase from QR data. For manual entry, provide a form with 12 input fields (one per word) with validation. Call backend to verify the recovery phrase via retrievePersistentRecoveryPhrase and compare. On successful match, trigger re-authentication flow. Show error messages for invalid phrases or backend verification failures. Use Cyber-Tech styling consistent with existing components."
+        },
+        {
+          "path": "frontend/src/components/LoginPrompt.tsx",
           "operation": "modify",
-          "description": "Use the useKeyboardShortcuts hook (created in REQ-2) to listen for Esc key. Wire Esc to trigger the onClose callback that already exists in this component. Ensure the shortcut only fires when the editor is active/visible. On desktop layout (>1024px), Esc should clear selectedNote and return focus to the notes list."
+          "description": "Add 'Scan to Sync' button to the LoginPrompt component below the main Internet Identity login button. Button should open the RecoveryRestoreDialog component. Style button with secondary styling (gold outline) to distinguish from primary login action. Include brief descriptive text like 'Restore vault from recovery key'."
         }
       ]
     },
     {
       "id": "REQ-5",
-      "summary": "Display a golden notification prompting desktop users to install CypherSafe as a PWA",
+      "summary": "Implement export functionality allowing users to save the Master Key as password-protected PDF or high-resolution printable image",
       "acceptanceCriteria": [
-        "Notification appears only on desktop browsers (screen width >1024px)",
-        "Notification has a golden/amber visual theme",
-        "Notification is dismissible and does not reappear after dismissal",
-        "Notification prompts PWA install if supported by browser"
+        "PDF export includes the Vault Card design with 12-word phrase and QR code",
+        "PDF is password-protected with user-chosen password",
+        "High-resolution image export (300 DPI or higher) suitable for printing",
+        "Both export formats maintain the Black & Gold premium design",
+        "Exports are initiated from the Vault Card interface"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/InstallPrompt.tsx",
+          "path": "frontend/src/utils/vaultCardExport.ts",
           "operation": "create",
-          "description": "Create a component that displays a golden/amber themed notification with the message: 'Install CypherSafe on your Desktop for a larger writing canvas.' Show the notification only when screen width >1024px (use window.matchMedia or Tailwind breakpoints). Store dismissal state in localStorage to prevent repeated display. If the browser supports PWA installation (beforeinstallprompt event), include an install button that triggers the native prompt. Otherwise, show a generic install message. Style with golden/amber colors matching the app's cyber-tech theme from frontend/src/index.css."
+          "description": "Create utility module for exporting Vault Card as PDF or image. For PDF export, use a library like jsPDF to render the card design with mnemonic and QR code, then apply password protection using pdf-lib or similar. For image export, use html2canvas or similar to capture the VaultCard component at high resolution (300 DPI equivalent, approximately 3000x2000 pixels for 10x6.67 inch card). Include functions: exportAsPDF(mnemonic, qrDataUrl, password), exportAsImage(mnemonic, qrDataUrl). Return downloadable File or Blob objects."
         },
         {
-          "path": "frontend/src/components/NotesApp.tsx",
+          "path": "frontend/src/components/VaultCardExportDialog.tsx",
+          "operation": "create",
+          "description": "Create modal dialog component for initiating Vault Card exports. Provide two export options: 'Export as Password-Protected PDF' and 'Export as High-Resolution Image'. For PDF export, include a password input field with confirmation. On export, call vaultCardExport utility functions and trigger browser download. Show loading state during export generation. Use Cyber-Tech styling and shadcn/ui Dialog component. Accept mnemonic phrase and QR code data URL as props."
+        },
+        {
+          "path": "frontend/src/components/VaultCard.tsx",
           "operation": "modify",
-          "description": "Import and render the InstallPrompt component near the top of the notes dashboard. Position it so it's visible but not intrusive (e.g., as a banner below the header or as a dismissible toast notification)."
+          "description": "Add 'Export' button to the VaultCard component footer that opens the VaultCardExportDialog. Style button with gold accent consistent with theme. Position button prominently below the security message."
         }
       ]
     },
     {
-      "id": "REQ-6",
-      "summary": "Verify that notes saved on mobile are instantly visible on desktop using the same Internet Identity login",
+      "id": "REQ-7",
+      "summary": "Integrate the master key display into the onboarding flow after ProfileSetup completion",
       "acceptanceCriteria": [
-        "Notes created or updated on one device appear immediately when refreshed on another device",
-        "Same Internet Identity principal accesses identical note data on all devices",
-        "No device-specific state isolation exists in the backend",
-        "React Query cache invalidation ensures fresh data after mutations"
+        "Key display occurs after profile setup is complete",
+        "Flow progresses: Profile Setup → Security Warning → Vault Card → Main Vault",
+        "User cannot skip viewing the master key during initial setup",
+        "After initial setup, key can be accessed from Settings for export"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/components/RecoverySetupFlow.tsx",
+          "operation": "create",
+          "description": "Create orchestration component that manages the recovery setup flow for first-time users. Use useRecoveryGeneration hook to generate or retrieve recovery data. Render RecoveryWarningDialog first, then VaultCard with export options after user confirms warning. Track flow state (warning → card display → completion) using local state. On completion, mark recovery setup as complete in user profile and proceed to main vault. Component should only render for first-time users who have completed profile setup but have not yet seen their recovery key."
+        },
+        {
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Review and ensure that all note mutations (create, update, delete) properly invalidate the React Query cache for note lists and individual notes. Verify that the queryKey structure is consistent and that invalidateQueries is called after every mutation. Ensure no device-specific caching logic exists that would prevent cross-device synchronization. Add refetchOnWindowFocus: true to note list queries if not already present, so switching back to the app refetches data."
+          "description": "Integrate RecoverySetupFlow into the authentication orchestration between ProfileSetup and WelcomePopup. Add conditional rendering: if user is authenticated, has profile, but has not completed recovery setup (check via user profile flag or recovery data existence query), show RecoverySetupFlow before proceeding to main vault. Ensure recovery setup is mandatory during first-time onboarding but skipped for returning users."
+        },
+        {
+          "path": "frontend/src/components/Settings.tsx",
+          "operation": "modify",
+          "description": "Add 'View & Export Recovery Key' option to the Settings page for authenticated users. When clicked, fetch user's recovery phrase from backend via retrievePersistentRecoveryPhrase, regenerate QR code, and display VaultCard with export options in a full-screen overlay or modal. Include security warning before displaying. This allows returning users to access their recovery key after initial setup."
         }
       ]
     }

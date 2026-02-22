@@ -1,135 +1,157 @@
 {
   "kind": "build_request",
-  "title": "Optimize CypherSafe for Desktop with Responsive Layout and Keyboard Shortcuts",
-  "projectName": "CypherSafe",
+  "title": "Add Secure Recovery System with 12-Word Phrase and Master QR Code",
+  "projectName": "CypherSafe Recovery System",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Implement responsive side-by-side layout for screens wider than 1024px: left panel displays the notes list, right panel displays the full-screen editor (focus mode)",
-      "target": "frontend",
+      "text": "Generate a 12-word mnemonic phrase (BIP39 standard) and corresponding Master QR Code during first-time user setup, after profile creation but before the main vault interface is shown",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-10"
+          "msg-7"
         ],
         "quotes": [
-          "When the screen width is larger than 1024px (PC mode), expand the dashboard into a Side-by-Side Layout. Left Panel: List of your secure notes. Right Panel: The Full-Screen Editor (Focus Mode)."
+          "When the user first sets up the app, generate a 'Golden 12-Word Phrase' (Secret Seed) or a Unique Master QR Code"
         ]
       },
       "acceptanceCriteria": [
-        "On screens wider than 1024px, NotesApp.tsx displays a two-column layout",
-        "Left column shows the NotesList component",
-        "Right column shows the FullScreenEditorOverlay component embedded inline (not as an overlay)",
-        "Layout remains stacked/single-column on screens 1024px or narrower"
+        "12-word phrase is generated using cryptographically secure randomness",
+        "Master QR Code encodes the same 12-word phrase",
+        "Generation happens once per user, during initial setup flow",
+        "Both phrase and QR code are derived from the same seed"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Add keyboard shortcut Ctrl+N to create a new note",
+      "text": "Design a premium 'Vault Card' component with Black & Gold theme displaying the master key (12-word phrase and QR code), including the security message: 'Your Master Key to the Fortress. Keep it offline. Keep it secret.'",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-10"
+          "msg-7"
         ],
         "quotes": [
-          "Ctrl + N to create a New Crypt."
+          "Design a beautiful, premium-looking 'Digital Card' in Black & Gold that displays this key. Add the text: 'Your Master Key to the Fortress. Keep it offline. Keep it secret.'"
         ]
       },
       "acceptanceCriteria": [
-        "Pressing Ctrl+N anywhere in the app triggers note creation",
-        "Shortcut opens the full-screen editor for a new note",
-        "Shortcut only activates when user is authenticated"
+        "Card uses black background with gold accents matching premium aesthetic",
+        "Displays 12-word phrase in readable format (e.g., numbered grid)",
+        "Shows QR code prominently on the card",
+        "Includes exact security message text",
+        "Card design feels elegant and high-security"
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Add keyboard shortcut Ctrl+S to save the current note",
+      "text": "Show a security warning dialog before displaying the master key that states: 'This is the only way to recover your data. If lost, even I cannot open your vault.'",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-10"
+          "msg-7"
         ],
         "quotes": [
-          "Ctrl + S to Save."
+          "Before showing the key, the AI should say: 'This is the only way to recover your data. If lost, even I cannot open your vault.'"
         ]
       },
       "acceptanceCriteria": [
-        "Pressing Ctrl+S while editing a note triggers the save mutation",
-        "Default browser save behavior is prevented",
-        "Visual feedback confirms save action"
+        "Warning appears before the Vault Card is revealed",
+        "Contains exact warning text provided",
+        "User must acknowledge/confirm before proceeding",
+        "Warning emphasizes the critical importance of the key"
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Add keyboard shortcut Esc to exit focus mode editor",
-      "target": "frontend",
+      "text": "Add 'Scan to Sync' option on the login screen allowing users to restore their vault by either scanning the Master QR Code or manually entering the 12-word phrase",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-10"
+          "msg-7"
         ],
         "quotes": [
-          "Esc to exit Focus Mode."
+          "On a new PC or phone, add a 'Scan to Sync' option on the login screen. The user can either scan the QR from their old phone or type the 12 words to instantly restore all blockchain notes"
         ]
       },
       "acceptanceCriteria": [
-        "Pressing Esc closes the full-screen editor overlay",
-        "On desktop (>1024px), Esc clears the selected note and returns to notes list only",
-        "Shortcut only works when editor is active"
+        "Login screen includes 'Scan to Sync' button/option",
+        "QR scanner interface allows camera-based scanning",
+        "Manual entry option accepts 12-word phrase input",
+        "Both methods restore full vault access when valid key is provided",
+        "Invalid keys show clear error messages"
       ]
     },
     {
       "id": "REQ-5",
-      "text": "Display a golden notification prompting desktop users to install CypherSafe with the message: 'Install CypherSafe on your Desktop for a larger writing canvas.'",
+      "text": "Implement export functionality allowing users to save the Master Key as a password-protected PDF or high-resolution printable image",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-10"
+          "msg-7"
         ],
         "quotes": [
-          "If the user is on a Desktop browser, show a small golden notification: 'Install CypherSafe on your Desktop for a larger writing canvas.'"
+          "Allow the user to save this Master Key as a Password-Protected PDF or a high-resolution image to print and keep in a physical safe"
         ]
       },
       "acceptanceCriteria": [
-        "Notification appears only on desktop browsers (screen width >1024px)",
-        "Notification has a golden/amber visual theme",
-        "Notification is dismissible and does not reappear after dismissal",
-        "Notification prompts PWA install if supported by browser"
+        "PDF export includes the Vault Card design with 12-word phrase and QR code",
+        "PDF is password-protected with user-chosen password",
+        "High-resolution image export (300 DPI or higher) suitable for printing",
+        "Both export formats maintain the Black & Gold premium design",
+        "Exports are initiated from the Vault Card interface"
       ]
     },
     {
       "id": "REQ-6",
-      "text": "Verify that notes saved on mobile via ICP blockchain are instantly visible on the PC version using the same Internet Identity login",
-      "target": "both",
+      "text": "Store the 12-word phrase securely in the backend associated with the user's Principal identity to enable recovery verification and vault restoration",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-10"
-        ],
-        "quotes": [
-          "Ensure that notes saved on the mobile via ICP Blockchain are instantly visible on the PC version using the same login/key."
+          "msg-7"
         ]
       },
       "acceptanceCriteria": [
-        "Notes created or updated on one device appear immediately when refreshed on another device",
-        "Same Internet Identity principal accesses identical note data on all devices",
-        "No device-specific state isolation exists in the backend",
-        "React Query cache invalidation ensures fresh data after mutations"
+        "12-word phrase is stored encrypted or hashed in backend",
+        "Backend validates provided recovery phrase during restoration",
+        "Recovery phrase is linked to user's Principal for verification",
+        "Backend supports querying whether a recovery phrase exists for current user"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Integrate the master key display into the onboarding flow after ProfileSetup completion, showing the security warning followed by the Vault Card with export options",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-7"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Key display occurs after profile setup is complete",
+        "Flow progresses: Profile Setup → Security Warning → Vault Card → Main Vault",
+        "User cannot skip viewing the master key during initial setup",
+        "After initial setup, key can be accessed from Settings for export"
       ]
     }
   ],
   "constraints": [
-    "Do not modify backend authentication or note storage logic",
-    "Preserve existing mobile-first responsive design for screens ≤1024px",
-    "Keep Internet Identity as the sole authentication mechanism",
-    "Maintain existing note encryption and self-destruct features"
+    "Must use Motoko for all backend cryptographic operations and storage",
+    "Cannot use external authentication services; Internet Identity is the only supported auth",
+    "Recovery system must work entirely within ICP blockchain infrastructure",
+    "QR scanning must use browser APIs or React-compatible libraries, no native mobile features"
   ],
   "nonGoals": [
-    "Offline editing or local-first sync",
-    "Native desktop application distribution",
-    "Additional authentication methods beyond Internet Identity",
-    "Backend changes to note schema or storage architecture"
+    "Biometric authentication integration",
+    "SMS or email-based recovery",
+    "Multi-signature recovery workflows",
+    "Hardware security key integration beyond Internet Identity",
+    "Cloud backup services for recovery phrases"
   ],
   "imageRequirements": {
-    "required": [],
+    "required": [
+      "Premium Black & Gold fortress lock icon for Vault Card header (vault-card-lock.dim_128x128.png)"
+    ],
     "edits": []
   }
 }

@@ -1,86 +1,82 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-18T18:12:14.540Z",
+  "generatedAt": "2026-02-22T08:20:24.577Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 6,
-    "implemented": 6,
+    "total": 7,
+    "implemented": 0,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Implement responsive side-by-side layout for screens wider than 1024px: left panel displays the notes list, right panel displays the full-screen editor (focus mode)",
-        "status": "implemented",
+        "summary": "Generate a 12-word mnemonic phrase (BIP39 standard) and corresponding Master QR Code during first-time user setup, after profile creation but before the main vault interface is shown",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/components/NotesApp.tsx",
-          "frontend/src/components/FullScreenEditorOverlay.tsx"
+          "frontend/src/utils/mnemonicGenerator.ts",
+          "frontend/src/utils/qrCodeGenerator.ts",
+          "frontend/src/hooks/useRecoveryGeneration.ts"
         ],
-        "matchedFiles": [
-          "frontend/src/components/NotesApp.tsx",
-          "frontend/src/components/FullScreenEditorOverlay.tsx"
-        ]
+        "matchedFiles": []
       },
       {
         "id": "REQ-2",
-        "summary": "Add keyboard shortcut Ctrl+N to create a new note",
-        "status": "implemented",
+        "summary": "Design a premium 'Vault Card' component with Black & Gold theme displaying the master key (12-word phrase and QR code), including the security message: 'Your Master Key to the Fortress. Keep it offline. Keep it secret.'",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/hooks/useKeyboardShortcuts.ts",
-          "frontend/src/components/NotesApp.tsx"
+          "frontend/src/components/VaultCard.tsx"
         ],
-        "matchedFiles": [
-          "frontend/src/hooks/useKeyboardShortcuts.ts",
-          "frontend/src/components/NotesApp.tsx"
-        ]
+        "matchedFiles": []
       },
       {
         "id": "REQ-3",
-        "summary": "Add keyboard shortcut Ctrl+S to save the current note",
-        "status": "implemented",
+        "summary": "Show a security warning dialog before displaying the master key that states: 'This is the only way to recover your data. If lost, even I cannot open your vault.'",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/components/FullScreenEditorOverlay.tsx"
+          "frontend/src/components/RecoveryWarningDialog.tsx"
         ],
-        "matchedFiles": [
-          "frontend/src/components/FullScreenEditorOverlay.tsx"
-        ]
+        "matchedFiles": []
       },
       {
         "id": "REQ-4",
-        "summary": "Add keyboard shortcut Esc to exit focus mode editor",
-        "status": "implemented",
+        "summary": "Add 'Scan to Sync' option on the login screen allowing users to restore their vault by either scanning the Master QR Code or manually entering the 12-word phrase",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/components/FullScreenEditorOverlay.tsx"
+          "frontend/src/components/RecoveryRestoreDialog.tsx",
+          "frontend/src/components/LoginPrompt.tsx"
         ],
-        "matchedFiles": [
-          "frontend/src/components/FullScreenEditorOverlay.tsx"
-        ]
+        "matchedFiles": []
       },
       {
         "id": "REQ-5",
-        "summary": "Display a golden notification prompting desktop users to install CypherSafe with the message: 'Install CypherSafe on your Desktop for a larger writing canvas.'",
-        "status": "implemented",
+        "summary": "Implement export functionality allowing users to save the Master Key as a password-protected PDF or high-resolution printable image",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/components/InstallPrompt.tsx",
-          "frontend/src/components/NotesApp.tsx"
+          "frontend/src/utils/vaultCardExport.ts",
+          "frontend/src/components/VaultCardExportDialog.tsx",
+          "frontend/src/components/VaultCard.tsx"
         ],
-        "matchedFiles": [
-          "frontend/src/components/InstallPrompt.tsx",
-          "frontend/src/components/NotesApp.tsx"
-        ]
+        "matchedFiles": []
       },
       {
         "id": "REQ-6",
-        "summary": "Verify that notes saved on mobile via ICP blockchain are instantly visible on the PC version using the same Internet Identity login",
-        "status": "implemented",
+        "summary": "Store the 12-word phrase securely in the backend associated with the user's Principal identity to enable recovery verification and vault restoration",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-7",
+        "summary": "Integrate the master key display into the onboarding flow after ProfileSetup completion, showing the security warning followed by the Vault Card with export options",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/components/RecoverySetupFlow.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/components/Settings.tsx"
         ],
-        "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts"
-        ]
+        "matchedFiles": []
       }
     ]
   },
@@ -89,17 +85,14 @@
     "build-request.json",
     "caffeine.lock.json",
     "feature_evidence.json",
-    "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/FullScreenEditorOverlay.tsx",
-    "frontend/src/components/InstallPrompt.tsx",
-    "frontend/src/components/NotesApp.tsx",
-    "frontend/src/components/SecureNoteViewPage.tsx",
-    "frontend/src/config.ts",
-    "frontend/src/hooks/useKeyboardShortcuts.ts",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/index.css",
-    "frontend/src/utils/urlParams.ts",
+    "frontend/public/assets/generated/vault-card-lock.dim_128x128.png",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/camera/useCamera.ts",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/qr-code/useQRScanner.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

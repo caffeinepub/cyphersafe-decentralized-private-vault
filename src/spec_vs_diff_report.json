@@ -1,31 +1,75 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-18T18:12:14.537Z",
-  "summary": "The diff implements most of the requested features for desktop optimization, including responsive layout, keyboard shortcuts (Ctrl+N, Ctrl+S, Esc), desktop install prompt with golden styling, and cross-device sync infrastructure. However, evidence for REQ-1's inline editor requirement is ambiguous in the truncated diff, and backend verification for REQ-6 is difficult to assess from the truncated backend code.",
+  "generatedAt": "2026-02-22T08:20:24.571Z",
+  "summary": "The diff shows only backend infrastructure changes in main.mo (storage functions for recovery data), but lacks all frontend components, QR code generation/scanning, BIP39 mnemonic generation, PDF export, vault card UI, security warnings, and onboarding flow integration. The project_state.json shows all requirements still marked as 'pending'.",
   "missing_requirements": [
     {
       "id": "REQ-1",
-      "requirement": "Right column shows the FullScreenEditorOverlay component embedded inline (not as an overlay)",
-      "reason": "The truncated NotesApp.tsx diff shows responsive layout logic and mentions isInlineMode, but the implementation details confirming inline embedding on desktop (>1024px) versus overlay mode on mobile are not fully visible in the truncated code. The acceptance criteria requires the editor to be embedded inline on desktop, not as an overlay.",
+      "requirement": "Generate a 12-word mnemonic phrase (BIP39 standard) and corresponding Master QR Code during first-time user setup",
+      "reason": "No BIP39 mnemonic generation logic found. Backend only stores generic text as 'mnemonic' but doesn't generate BIP39-compliant phrases. No QR code generation implementation found.",
       "evidence": [
-        "frontend/src/components/NotesApp.tsx"
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "requirement": "Design a premium 'Vault Card' component with Black & Gold theme displaying the master key",
+      "reason": "No frontend component files modified or added. No Vault Card UI component implementation found.",
+      "evidence": []
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Show a security warning dialog before displaying the master key",
+      "reason": "No frontend dialog/modal component for security warning found in the diff.",
+      "evidence": []
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "Add 'Scan to Sync' option on the login screen allowing users to restore their vault by scanning QR Code or entering 12-word phrase",
+      "reason": "No login screen modifications found. No QR scanner implementation. No manual phrase entry UI found. Backend has retrieval function but no validation or restoration logic.",
+      "evidence": []
+    },
+    {
+      "id": "REQ-5",
+      "requirement": "Implement export functionality allowing users to save the Master Key as password-protected PDF or high-resolution printable image",
+      "reason": "No PDF generation library integration or export functionality found. No image export capability implemented.",
+      "evidence": []
+    },
+    {
+      "id": "REQ-6",
+      "requirement": "Store the 12-word phrase securely in the backend associated with the user's Principal identity to enable recovery verification and vault restoration",
+      "reason": "Backend stores mnemonic as plain text, not encrypted or hashed. No validation logic for recovery phrase verification found. No vault restoration mechanism implemented.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "requirement": "Integrate the master key display into the onboarding flow after ProfileSetup completion",
+      "reason": "No onboarding flow modifications found. No integration with ProfileSetup component. No routing or flow progression logic implemented.",
+      "evidence": []
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Admin-only function to list all persistent recovery data for all users",
+      "reason": "The listPersistentRecoveryData function allows admins to view recovery phrases for all users, which was not requested and violates the privacy-focused security model described in the requirements.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "description": "Public function to clear/delete persistent recovery data",
+      "reason": "The clearPersistentRecoveryData function allows users to delete their recovery phrase, which contradicts the requirement that recovery data must be stored permanently for vault restoration purposes.",
+      "evidence": [
+        "backend/main.mo"
       ]
     }
   ],
-  "hallucinated_features": [],
-  "confidence": 0.75,
+  "confidence": 0.95,
   "changed_files": [
     "backend/main.mo",
-    "frontend-file-summaries.txt",
-    "frontend/src/components/FullScreenEditorOverlay.tsx",
-    "frontend/src/components/InstallPrompt.tsx",
-    "frontend/src/components/NotesApp.tsx",
-    "frontend/src/components/SecureNoteViewPage.tsx",
-    "frontend/src/hooks/useKeyboardShortcuts.ts",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/index.css",
-    "frontend/src/utils/urlParams.ts",
     "project_state.json"
   ]
 }

@@ -32,6 +32,11 @@ export interface Note {
   'createdAt' : bigint,
   'lastModified' : bigint,
 }
+export interface PersistentRecoveryData {
+  'creationTime' : Time,
+  'mnemonic' : string,
+}
+export type Time = bigint;
 export interface UserProfile {
   'name' : string,
   'muteGreeting' : boolean,
@@ -70,6 +75,7 @@ export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'cleanupExpiredShareLinks' : ActorMethod<[], undefined>,
+  'clearPersistentRecoveryData' : ActorMethod<[], undefined>,
   'createExtendedNote' : ActorMethod<[ExtendedNoteInput], undefined>,
   'createNote' : ActorMethod<[string, string, [] | [bigint]], undefined>,
   'createShareLink' : ActorMethod<
@@ -89,15 +95,21 @@ export interface _SERVICE {
   'getNote' : ActorMethod<[string], Note>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'listPersistentRecoveryData' : ActorMethod<
+    [],
+    Array<[Principal, PersistentRecoveryData]>
+  >,
   'markWelcomePopupSeen' : ActorMethod<[], undefined>,
   'migrate' : ActorMethod<[], undefined>,
   'openShareLink' : ActorMethod<[string], [Uint8Array, Uint8Array]>,
+  'retrievePersistentRecoveryPhrase' : ActorMethod<[], string>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'searchExtendedNotes' : ActorMethod<[string], Array<ExtendedNote>>,
   'searchNotes' : ActorMethod<[string], Array<Note>>,
   'setExtendedNoteSelfDestructTimer' : ActorMethod<[string, bigint], undefined>,
   'setMuteGreetingPreference' : ActorMethod<[boolean], undefined>,
   'setSelfDestructTimer' : ActorMethod<[string, bigint], undefined>,
+  'storePersistentRecoveryData' : ActorMethod<[string], undefined>,
   'updateExtendedNote' : ActorMethod<
     [string, string, [] | [bigint], [] | [ExternalBlob]],
     undefined
